@@ -1,7 +1,14 @@
 import apiSlice from "..";
 import { AuthStateType } from "./../../store/features/authSlice";
 import { RoleType } from "./../../types/data.types";
-import { LoginRequest, LoginResponse } from "./types";
+import {
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
+} from "./types";
 
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -29,7 +36,25 @@ export const authApiSlice = apiSlice.injectEndpoints({
         return transformResponse;
       },
     }),
+    signup: builder.mutation<RegisterResponse, RegisterRequest>({
+      query: (credentials) => ({
+        url: "authentication/register",
+        method: "POST",
+        body: credentials,
+      }),
+    }),
+    resetPassword: builder.mutation<
+      ForgotPasswordResponse,
+      ForgotPasswordRequest
+    >({
+      query: (credentials) => ({
+        url: "authentication/forgot-password",
+        method: "POST",
+        body: credentials,
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation } = authApiSlice;
+export const { useLoginMutation, useSignupMutation, useResetPasswordMutation } =
+  authApiSlice;

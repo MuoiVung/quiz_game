@@ -1,66 +1,48 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { LoadingButton } from "@mui/lab";
-import {
-  Box,
-  Checkbox,
-  FormControlLabel,
-  Grid,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Grid, TextField, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import * as yup from "yup";
-import { useLoginMutation } from "../../api/AuthAPI";
+import { useResetPasswordMutation } from "../../api/AuthAPI";
 import { ErrorResponseType } from "../../api/AuthAPI/types";
 
 import IconSvg from "../../components/IconSvg";
 import COLORS from "../../constants/colors";
-import { setCredentials } from "../../store/features/authSlice";
-import { useAppDispatch } from "../../store/store";
-import { LoginFormDataType } from "./types";
+import { ForgotPasswordDataType } from "./types";
 
-const defaultLoginValues: LoginFormDataType = {
+const defaultForgotPasswordValue: ForgotPasswordDataType = {
   email: "",
-  password: "",
 };
 
 const validateSchema = yup
   .object({
     email: yup.string().email("Email is invalid").required("Email is required"),
-    password: yup
-      .string()
-      .required("Password is required")
-      .min(6, "Password must be at least 6 characters"),
-    // .matches(
-    //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>])(?=.*[^\da-zA-Z]).{8,}$/,
-    //   "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character"
-    // ),
   })
   .required();
 
-const LoginScreen = () => {
+const ForgotPasswordScreen = () => {
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<LoginFormDataType>({
+  } = useForm<ForgotPasswordDataType>({
     resolver: yupResolver(validateSchema),
-    defaultValues: defaultLoginValues,
+    defaultValues: defaultForgotPasswordValue,
   });
 
-  const [login, { isLoading }] = useLoginMutation();
-  const dispatch = useAppDispatch();
+  const [resetPassword, { isLoading }] = useResetPasswordMutation();
 
-  const handleLogin = async (data: LoginFormDataType) => {
+  const handleRegister = async (data: ForgotPasswordDataType) => {
     try {
-      const result = await login(data).unwrap();
-      dispatch(setCredentials(result));
+      await resetPassword(data).unwrap();
       reset();
+
+      alert("Please check email for new password!");
     } catch (error) {
       const err = error as ErrorResponseType;
-      console.error(err.data.message);
+      alert(err.data.message);
     }
   };
 
@@ -100,11 +82,11 @@ const LoginScreen = () => {
               color: "rgba(0,0,0,0.6)",
             }}
           >
-            Please login to your account
+            Please enter your email to reset password
           </Typography>
         </Box>
         {/* FORM */}
-        <Box component="form" onSubmit={handleSubmit(handleLogin)}>
+        <Box component="form" onSubmit={handleSubmit(handleRegister)}>
           <TextField
             required
             {...register("email")}
@@ -117,22 +99,6 @@ const LoginScreen = () => {
             margin="normal"
             autoComplete="true"
           />
-          <TextField
-            type="password"
-            required
-            {...register("password")}
-            error={errors.password ? true : false}
-            helperText={errors.password?.message}
-            name="password"
-            label="Password"
-            fullWidth
-            margin="normal"
-            autoComplete="true"
-          />
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
-          />
           <LoadingButton
             loading={isLoading}
             type="submit"
@@ -140,22 +106,22 @@ const LoginScreen = () => {
             variant="contained"
             sx={{ mt: 3, mb: 2, color: COLORS.WHITE, py: "12px" }}
           >
-            Sign in
+            Send
           </LoadingButton>
         </Box>
         {/* FORM */}
         <Grid container>
           <Grid item xs>
-            <Link to="/forgot-password" style={{ textDecoration: "none" }}>
+            <Link to="/register" style={{ textDecoration: "none" }}>
               <Typography color="primary" sx={{ textDecoration: "underline" }}>
-                Forgot Password
+                Don't have an account? Sign Up
               </Typography>
             </Link>
           </Grid>
           <Grid item>
-            <Link to="/register" style={{ textDecoration: "none" }}>
+            <Link to="/" style={{ textDecoration: "none" }}>
               <Typography color="primary" sx={{ textDecoration: "underline" }}>
-                Don't have an account? Sign Up
+                Already have an account? Login here!
               </Typography>
             </Link>
           </Grid>
@@ -179,4 +145,4 @@ const LoginScreen = () => {
   );
 };
 
-export default LoginScreen;
+export default ForgotPasswordScreen;

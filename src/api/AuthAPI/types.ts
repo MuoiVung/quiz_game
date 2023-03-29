@@ -44,6 +44,16 @@ export interface RefreshTokenResponse {
   data: RefreshTokenResponseData;
 }
 
+// FORGOT PASSWORD REQUEST
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  statusCode: number;
+  message: string;
+}
+
 export interface LoginResponseData {
   user: UserClass;
   tokens: Tokens;
@@ -79,4 +89,12 @@ export interface RefreshTokenResponseData {
 export interface NewTokens {
   access_token: string;
   refresh_token: string;
+}
+
+export interface ErrorResponseType {
+  data: {
+    message: string;
+    statusCode: number;
+  };
+  status: number;
 }

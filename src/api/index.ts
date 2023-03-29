@@ -1,9 +1,3 @@
-import { RefreshTokenResponse } from "./AuthAPI/types";
-import {
-  logout,
-  setCredentials,
-  setNewAccessToken,
-} from "../store/features/authSlice";
 import {
   BaseQueryFn,
   createApi,
@@ -11,8 +5,10 @@ import {
   fetchBaseQuery,
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
-import { RootState } from "../store/store";
 import { Mutex } from "async-mutex";
+import { logout, setNewAccessToken } from "../store/features/authSlice";
+import { RootState } from "../store/store";
+import { RefreshTokenResponse } from "./AuthAPI/types";
 
 const mutex = new Mutex();
 const baseQuery = fetchBaseQuery({

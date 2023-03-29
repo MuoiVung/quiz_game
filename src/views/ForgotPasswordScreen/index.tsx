@@ -1,5 +1,1 @@
-const ForgotPassWordScreen = () => {
-  return <div>ForgotPassWordScreen</div>;
-};
-
-export default ForgotPassWordScreen;
+export { default } from "./ForgotPasswordScreen";
