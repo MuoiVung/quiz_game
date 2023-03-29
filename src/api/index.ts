@@ -10,9 +10,11 @@ import { logout, setNewAccessToken } from "../store/features/authSlice";
 import { RootState } from "../store/store";
 import { RefreshTokenResponse } from "./AuthAPI/types";
 
+const BASE_URL = process.env.BASE_URL || "";
+
 const mutex = new Mutex();
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://quangnh.xyz/v1",
+  baseUrl: BASE_URL,
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth?.accessToken;
     if (token) {
