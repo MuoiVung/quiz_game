@@ -1,4 +1,9 @@
-import { logout, setCredentials } from "../store/features/authSlice";
+import { RefreshTokenResponse } from "./AuthAPI/types";
+import {
+  logout,
+  setCredentials,
+  setNewAccessToken,
+} from "../store/features/authSlice";
 import {
   BaseQueryFn,
   createApi,
@@ -7,12 +12,13 @@ import {
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store/store";
+import { Mutex } from "async-mutex";
 
+const mutex = new Mutex();
 const baseQuery = fetchBaseQuery({
   baseUrl: "https://quangnh.xyz/v1",
-  credentials: "include",
   prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as RootState).auth?.token;
+    const token = (getState() as RootState).auth?.accessToken;
     if (token) {
       headers.set("authorization", `Bearer ${token}`);
     }
@@ -25,21 +31,40 @@ const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
+  // wait until the mutex is available without locking it
+  await mutex.waitForUnlock();
+
   let result = await baseQuery(args, api, extraOptions);
+
   if (result.error && result.error.status === 401) {
-    // try to get a new token
-    const refreshResult = await baseQuery(
-      "/authentication/refresh-token",
-      api,
-      extraOptions
-    );
-    if (refreshResult.data) {
-      // store the new token
-      api.dispatch(setCredentials(refreshResult.data));
-      // retry the initial query
-      result = await baseQuery(args, api, extraOptions);
+    if (!mutex.isLocked()) {
+      const release = await mutex.acquire();
+      try {
+        // try to get a new token
+        const refreshResult = (await baseQuery(
+          "/authentication/refresh-token",
+          api,
+          extraOptions
+        )) as RefreshTokenResponse;
+
+        const newAccessToken = refreshResult?.data?.newTokens?.access_token;
+
+        if (newAccessToken) {
+          // store the new token
+          api.dispatch(setNewAccessToken(newAccessToken));
+          // retry the initial query
+          result = await baseQuery(args, api, extraOptions);
+        } else {
+          api.dispatch(logout());
+        }
+      } finally {
+        // release must be called once the mutex should be released again.
+        release();
+      }
     } else {
-      api.dispatch(logout());
+      // wait until the mutex is available without locking it
+      await mutex.waitForUnlock();
+      result = await baseQuery(args, api, extraOptions);
     }
   }
 
