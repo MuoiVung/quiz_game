@@ -1,32 +1,49 @@
-import { UserType } from "./types";
-import { RootState } from "./../store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { UserType } from "../../types/data.types";
+import { encryptData } from "../../utils/lsCryptoJS.util";
+import { RootState } from "./../store";
 
-const initialState: { user: UserType | null; token: string | null } = {
+export type AuthStateType = {
+  user: UserType | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+};
+
+const initialState: AuthStateType = {
   user: null,
-  token: null,
+  accessToken: null,
+  refreshToken: null,
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setCredentials: (state, action) => {
+    setCredentials: (state, action: PayloadAction<AuthStateType>) => {
       console.log(action.payload);
-      //   const { user, accessToken } = action.payload;
-      //   state.user = user;
-      //   state.token = accessToken;
+      encryptData("auth", action.payload);
+      return (state = { ...action.payload });
+    },
+    setNewAccessToken: (state, action: PayloadAction<string>) => {
+      encryptData("auth", state);
+      state.accessToken = action.payload;
     },
     logout: (state) => {
       state.user = null;
-      state.token = null;
+      state.accessToken = null;
+      state.refreshToken = null;
+      localStorage.clear();
+    },
+    initCredentials: (state, action: PayloadAction<AuthStateType>) => {
+      return (state = action.payload);
     },
   },
 });
 
-export const { setCredentials, logout } = authSlice.actions;
+export const { setCredentials, setNewAccessToken, logout, initCredentials } =
+  authSlice.actions;
 
 export default authSlice.reducer;
 
 export const selectCurrentUser = (state: RootState) => state.auth.user;
-export const selectCurrentToken = (state: RootState) => state.auth.token;
+export const selectCurrentToken = (state: RootState) => state.auth.accessToken;
