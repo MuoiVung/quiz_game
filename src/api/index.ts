@@ -6,11 +6,12 @@ import {
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 import { Mutex } from "async-mutex";
-import { logout, setNewAccessToken } from "../store/features/authSlice";
-import { RootState } from "../store/store";
+
+import { logout, setCredentials } from "../store/features/authSlice";
+import store, { RootState } from "../store/store";
 import { RefreshTokenResponse } from "./AuthAPI/types";
 
-const BASE_URL = process.env.BASE_URL || "";
+const BASE_URL = process.env.REACT_APP_BASE_URL || "";
 
 const mutex = new Mutex();
 const baseQuery = fetchBaseQuery({
@@ -20,6 +21,7 @@ const baseQuery = fetchBaseQuery({
     if (token) {
       headers.set("authorization", `Bearer ${token}`);
     }
+
     return headers;
   },
 });
@@ -29,6 +31,7 @@ const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
+  const authState = store.getState().auth;
   // wait until the mutex is available without locking it
   await mutex.waitForUnlock();
 
@@ -39,20 +42,32 @@ const baseQueryWithReauth: BaseQueryFn<
       const release = await mutex.acquire();
       try {
         // try to get a new token
+        console.log("get a new token");
         const refreshResult = (await baseQuery(
-          "/authentication/refresh-token",
+          {
+            url: "/authentication/refresh-token",
+            method: "POST",
+            body: { refresh_token: authState.refreshToken },
+          },
           api,
           extraOptions
         )) as RefreshTokenResponse;
 
-        const newAccessToken = refreshResult?.data?.newTokens?.access_token;
+        console.log(refreshResult);
 
-        if (newAccessToken) {
+        if (refreshResult?.data) {
           // store the new token
-          api.dispatch(setNewAccessToken(newAccessToken));
+          api.dispatch(
+            setCredentials({
+              ...authState,
+              accessToken: refreshResult?.data?.newTokens?.access_token,
+              refreshToken: refreshResult?.data?.newTokens?.refresh_token,
+            })
+          );
           // retry the initial query
           result = await baseQuery(args, api, extraOptions);
         } else {
+          console.log("get new token failed");
           api.dispatch(logout());
         }
       } finally {

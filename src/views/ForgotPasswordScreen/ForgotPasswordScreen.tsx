@@ -50,6 +50,20 @@ const ForgotPasswordScreen = () => {
     <Grid component="main" container sx={{ height: "100vh" }}>
       <Grid
         item
+        xs={false}
+        sm={4}
+        md={7}
+        sx={{
+          backgroundColor: COLORS.GRAY_100,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <IconSvg name="hands_graduate" />
+      </Grid>
+      <Grid
+        item
         xs={12}
         sm={8}
         md={5}
@@ -110,36 +124,19 @@ const ForgotPasswordScreen = () => {
           </LoadingButton>
         </Box>
         {/* FORM */}
-        <Grid container>
-          <Grid item xs>
-            <Link to="/register" style={{ textDecoration: "none" }}>
-              <Typography color="primary" sx={{ textDecoration: "underline" }}>
-                Don't have an account? Sign Up
-              </Typography>
-            </Link>
-          </Grid>
-          <Grid item>
-            <Link to="/" style={{ textDecoration: "none" }}>
-              <Typography color="primary" sx={{ textDecoration: "underline" }}>
-                Already have an account? Login here!
-              </Typography>
-            </Link>
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid
-        item
-        xs={false}
-        sm={4}
-        md={7}
-        sx={{
-          backgroundColor: COLORS.GRAY_100,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <IconSvg name="hands_graduate" />
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Link to="/register" style={{ textDecoration: "none" }}>
+            <Typography color="primary" sx={{ textDecoration: "underline" }}>
+              Don't have an account? Sign Up
+            </Typography>
+          </Link>
+
+          <Link to="/" style={{ textDecoration: "none" }}>
+            <Typography color="primary" sx={{ textDecoration: "underline" }}>
+              Already have an account? Login here!
+            </Typography>
+          </Link>
+        </Box>
       </Grid>
     </Grid>
   );

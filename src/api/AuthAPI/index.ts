@@ -6,6 +6,8 @@ import {
   ForgotPasswordResponse,
   LoginRequest,
   LoginResponse,
+  LogoutRequest,
+  LogoutResponse,
   RegisterRequest,
   RegisterResponse,
 } from "./types";
@@ -43,6 +45,13 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: credentials,
       }),
     }),
+    logout: builder.mutation<LogoutResponse, LogoutRequest>({
+      query: (refreshToken) => ({
+        url: "authentication/logout",
+        method: "POST",
+        body: refreshToken,
+      }),
+    }),
     resetPassword: builder.mutation<
       ForgotPasswordResponse,
       ForgotPasswordRequest
@@ -56,5 +65,9 @@ export const authApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useLoginMutation, useSignupMutation, useResetPasswordMutation } =
-  authApiSlice;
+export const {
+  useLoginMutation,
+  useSignupMutation,
+  useResetPasswordMutation,
+  useLogoutMutation,
+} = authApiSlice;

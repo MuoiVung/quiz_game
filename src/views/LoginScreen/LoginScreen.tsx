@@ -9,11 +9,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import * as yup from "yup";
-import { useLoginMutation } from "../../api/AuthAPI";
-import { ErrorResponseType } from "../../api/AuthAPI/types";
 
+import { useLoginMutation } from "../../api/AuthAPI";
 import IconSvg from "../../components/IconSvg";
 import COLORS from "../../constants/colors";
 import { setCredentials } from "../../store/features/authSlice";
@@ -52,20 +52,39 @@ const LoginScreen = () => {
 
   const [login, { isLoading }] = useLoginMutation();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const handleLogin = async (data: LoginFormDataType) => {
     try {
       const result = await login(data).unwrap();
       dispatch(setCredentials(result));
       reset();
+      navigate("/", { replace: true, state: {} });
     } catch (error) {
-      const err = error as ErrorResponseType;
-      console.error(err.data.message);
+      let errorMessage = "Invalid email or password. Please try again.";
+
+      toast.error(errorMessage, {
+        position: "top-center",
+      });
     }
   };
 
   return (
     <Grid component="main" container sx={{ height: "100vh" }}>
+      <Grid
+        item
+        xs={false}
+        sm={4}
+        md={7}
+        sx={{
+          backgroundColor: COLORS.GRAY_100,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <IconSvg name="hands_graduate" />
+      </Grid>
       <Grid
         item
         xs={12}
@@ -144,36 +163,19 @@ const LoginScreen = () => {
           </LoadingButton>
         </Box>
         {/* FORM */}
-        <Grid container>
-          <Grid item xs>
-            <Link to="/forgot-password" style={{ textDecoration: "none" }}>
-              <Typography color="primary" sx={{ textDecoration: "underline" }}>
-                Forgot Password
-              </Typography>
-            </Link>
-          </Grid>
-          <Grid item>
-            <Link to="/register" style={{ textDecoration: "none" }}>
-              <Typography color="primary" sx={{ textDecoration: "underline" }}>
-                Don't have an account? Sign Up
-              </Typography>
-            </Link>
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid
-        item
-        xs={false}
-        sm={4}
-        md={7}
-        sx={{
-          backgroundColor: COLORS.GRAY_100,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <IconSvg name="hands_graduate" />
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Link to="/forgot-password" style={{ textDecoration: "none" }}>
+            <Typography color="primary" sx={{ textDecoration: "underline" }}>
+              Forgot Password
+            </Typography>
+          </Link>
+
+          <Link to="/register" style={{ textDecoration: "none" }}>
+            <Typography color="primary" sx={{ textDecoration: "underline" }}>
+              Don't have an account? Sign Up
+            </Typography>
+          </Link>
+        </Box>
       </Grid>
     </Grid>
   );
