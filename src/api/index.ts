@@ -43,7 +43,7 @@ const baseQueryWithReauth: BaseQueryFn<
       try {
         // try to get a new token
         console.log("get a new token");
-        const refreshResult = (await baseQuery(
+        const refreshResult = await baseQuery(
           {
             url: "/authentication/refresh-token",
             method: "POST",
@@ -51,17 +51,17 @@ const baseQueryWithReauth: BaseQueryFn<
           },
           api,
           extraOptions
-        )) as RefreshTokenResponse;
+        );
 
-        console.log(refreshResult);
+        const refreshResultData = refreshResult?.data as RefreshTokenResponse;
 
-        if (refreshResult?.data) {
+        if (refreshResultData) {
           // store the new token
           api.dispatch(
             setCredentials({
               ...authState,
-              accessToken: refreshResult?.data?.newTokens?.access_token,
-              refreshToken: refreshResult?.data?.newTokens?.refresh_token,
+              accessToken: refreshResultData?.data?.newTokens?.access_token,
+              refreshToken: refreshResultData?.data?.newTokens?.refresh_token,
             })
           );
           // retry the initial query

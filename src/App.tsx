@@ -1,8 +1,8 @@
 import { ThemeProvider } from "@emotion/react";
-import { Provider } from "react-redux";
 import { CssBaseline } from "@mui/material";
-import "react-toastify/dist/ReactToastify.css";
+import { Provider } from "react-redux";
 import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import theme from "./constants/theme";
 import Routes from "./routes/Routes";
