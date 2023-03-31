@@ -1,11 +1,9 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { LoadingButton } from "@mui/lab";
-import { Box, Container, TextField, Typography } from "@mui/material";
+import { Box, Button, Container, TextField, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
 
-import { useGetPlayQuestionsQuery } from "../../api/QuestionsAPI";
 import COLORS from "../../constants/colors";
 import { SelectPlayQuestionsDataType } from "./types";
 
@@ -20,10 +18,6 @@ const validateSchema = yup
   .required();
 
 const PlayScreen = () => {
-  const { data: playQuestions, isLoading } = useGetPlayQuestionsQuery({
-    total: 0,
-  });
-
   const {
     register,
     handleSubmit,
@@ -34,10 +28,11 @@ const PlayScreen = () => {
   });
 
   const navigate = useNavigate();
-  console.log(playQuestions);
 
   const handleStartGame = (data: SelectPlayQuestionsDataType) => {
+    reset();
     // move to start game screen
+    navigate(`/play/${data.total}`, { replace: true });
   };
 
   return (
@@ -73,15 +68,14 @@ const PlayScreen = () => {
             type="number"
           />
           <Box>
-            <LoadingButton
-              loading={isLoading}
+            <Button
               type="submit"
               variant="contained"
               sx={{ mt: 3, mb: 2, color: COLORS.WHITE, py: "12px" }}
               fullWidth
             >
               Play
-            </LoadingButton>
+            </Button>
           </Box>
         </Box>
         {/* FORM */}

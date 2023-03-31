@@ -1,5 +1,10 @@
 import apiSlice from "..";
-import { GetPlayQuestionsRequest, GetPlayQuestionsResponse } from "./types";
+import {
+  GetPlayQuestionsRequest,
+  GetPlayQuestionsResponse,
+  SubmitQuestionsRequest,
+  SubmitQuestionsResponse,
+} from "./types";
 
 export const questionsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -9,7 +14,18 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
     >({
       query: (arg) => `questions/play?total=${arg.total}`,
     }),
+    submitQuestions: builder.mutation<
+      SubmitQuestionsResponse,
+      SubmitQuestionsRequest
+    >({
+      query: (body) => ({
+        url: "questions/submit",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
-export const { useGetPlayQuestionsQuery } = questionsApiSlice;
+export const { useGetPlayQuestionsQuery, useSubmitQuestionsMutation } =
+  questionsApiSlice;

@@ -9,7 +9,10 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Link, redirect, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useLogoutMutation } from "../api/AuthAPI";
+import IconSvg from "../components/IconSvg";
 import COLORS from "../constants/colors";
 import {
   logout,
@@ -17,9 +20,6 @@ import {
   selectRefreshToken,
 } from "../store/features/authSlice";
 import { useTypedSelector } from "../store/store";
-import IconSvg from "../components/IconSvg";
-import { useLogoutMutation } from "../api/AuthAPI";
-import { toast } from "react-toastify";
 
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -35,24 +35,26 @@ const Navbar = () => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    navigate("/profile");
+    navigate("/profile", { replace: true });
   };
 
   const handleLogout = async () => {
     setAnchorEl(null);
-    try {
-      if (refreshToken) {
-        await logoutMutation({ refresh_token: refreshToken });
-      }
-      dispatch(logout());
-      navigate("/", { replace: true });
-    } catch (error) {
-      let errorMessage = "Logout error. Something went wrong!";
+    dispatch(logout());
+    navigate("/", { replace: true });
+    // try {
+    //   if (refreshToken) {
+    //     await logoutMutation({ refresh_token: refreshToken });
+    //   }
+    //   dispatch(logout());
+    //   navigate("/", { replace: true });
+    // } catch (error) {
+    //   let errorMessage = "Logout error. Something went wrong!";
 
-      toast.error(errorMessage, {
-        position: "top-center",
-      });
-    }
+    //   toast.error(errorMessage, {
+    //     position: "top-center",
+    //   });
+    // }
   };
   return (
     <AppBar
@@ -69,7 +71,7 @@ const Navbar = () => {
           my: 1,
         }}
       >
-        <Link to="/">
+        <Link to="/" replace>
           <IconSvg name="brand" width={136} height={32} />
         </Link>
 
