@@ -1,16 +1,17 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { LoadingButton } from "@mui/lab";
 import { Box, Grid, TextField, Typography } from "@mui/material";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import * as yup from "yup";
 import { useLoginMutation, useSignupMutation } from "../../api/AuthAPI";
 import { ErrorResponseType } from "../../api/AuthAPI/types";
 
 import IconSvg from "../../components/IconSvg";
 import COLORS from "../../constants/colors";
-import { setCredentials } from "../../store/features/authSlice";
-import { useAppDispatch } from "../../store/store";
+import RegisterSuccessModal from "./RegistrationSuccessModal";
 import { RegisterFormDataType } from "./types";
 
 const defaultRegisterValues: RegisterFormDataType = {
@@ -46,30 +47,53 @@ const RegisterScreen = () => {
   });
 
   const [signup, { isLoading }] = useSignupMutation();
-  const [login, { isLoading: isLoginLoading }] = useLoginMutation();
-  const dispatch = useAppDispatch();
+  const [showModal, setShowModal] = useState(false);
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
   const navigate = useNavigate();
+
+  const navigateLogin = () => {
+    navigate("/");
+  };
 
   const handleRegister = async (data: RegisterFormDataType) => {
     try {
       await signup(data).unwrap();
-      const result = await login({
-        email: data.email,
-        password: data.password,
-      }).unwrap();
-
-      dispatch(setCredentials(result));
       reset();
-
-      navigate("/");
+      setShowModal(true);
     } catch (error) {
       const err = error as ErrorResponseType;
-      alert(err.data.message);
+      let errorMessage = "Signup failed. Please try again";
+
+      if (err.status === 400) {
+        errorMessage = err.data.message;
+      }
+
+      toast.error(errorMessage, {
+        position: "top-center",
+      });
     }
   };
 
   return (
     <Grid component="main" container sx={{ height: "100vh" }}>
+      <Grid
+        item
+        xs={false}
+        sm={4}
+        md={7}
+        sx={{
+          backgroundColor: COLORS.GRAY_100,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <IconSvg name="hands_graduate" />
+      </Grid>
       <Grid
         item
         xs={12}
@@ -97,14 +121,14 @@ const RegisterScreen = () => {
               color: "rgba(0,0,0,0.6)",
             }}
           >
-            Welcome Back!
+            Welcome!
           </Typography>
           <Typography
             sx={{
               color: "rgba(0,0,0,0.6)",
             }}
           >
-            Please login to your account
+            Create your account
           </Typography>
         </Box>
         {/* FORM */}
@@ -146,7 +170,7 @@ const RegisterScreen = () => {
             autoComplete="true"
           />
           <LoadingButton
-            loading={isLoading || isLoginLoading}
+            loading={isLoading}
             type="submit"
             fullWidth
             variant="contained"
@@ -156,37 +180,25 @@ const RegisterScreen = () => {
           </LoadingButton>
         </Box>
         {/* FORM */}
-        <Grid container>
-          <Grid item xs>
-            <Link to="/forgot-password" style={{ textDecoration: "none" }}>
-              <Typography color="primary" sx={{ textDecoration: "underline" }}>
-                Forgot Password
-              </Typography>
-            </Link>
-          </Grid>
-          <Grid item>
-            <Link to="/" style={{ textDecoration: "none" }}>
-              <Typography color="primary" sx={{ textDecoration: "underline" }}>
-                Already have an account? Login here!
-              </Typography>
-            </Link>
-          </Grid>
-        </Grid>
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Link to="/forgot-password" style={{ textDecoration: "none" }}>
+            <Typography color="primary" sx={{ textDecoration: "underline" }}>
+              Forgot Password
+            </Typography>
+          </Link>
+
+          <Link to="/" style={{ textDecoration: "none" }}>
+            <Typography color="primary" sx={{ textDecoration: "underline" }}>
+              Already have an account? Login here!
+            </Typography>
+          </Link>
+        </Box>
       </Grid>
-      <Grid
-        item
-        xs={false}
-        sm={4}
-        md={7}
-        sx={{
-          backgroundColor: COLORS.GRAY_100,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <IconSvg name="hands_graduate" />
-      </Grid>
+      <RegisterSuccessModal
+        open={showModal}
+        onClose={handleCloseModal}
+        onRedirect={navigateLogin}
+      />
     </Grid>
   );
 };

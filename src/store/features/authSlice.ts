@@ -20,13 +20,8 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setCredentials: (state, action: PayloadAction<AuthStateType>) => {
-      console.log(action.payload);
       encryptData("auth", action.payload);
       return (state = { ...action.payload });
-    },
-    setNewAccessToken: (state, action: PayloadAction<string>) => {
-      encryptData("auth", state);
-      state.accessToken = action.payload;
     },
     logout: (state) => {
       state.user = null;
@@ -40,10 +35,10 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, setNewAccessToken, logout, initCredentials } =
-  authSlice.actions;
+export const { setCredentials, logout, initCredentials } = authSlice.actions;
 
 export default authSlice.reducer;
 
 export const selectCurrentUser = (state: RootState) => state.auth.user;
 export const selectCurrentToken = (state: RootState) => state.auth.accessToken;
+export const selectRefreshToken = (state: RootState) => state.auth.refreshToken;

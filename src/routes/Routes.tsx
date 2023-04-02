@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import LoadingScreen from "../components/LoadingScreen";
 import {
   AuthStateType,
   initCredentials,
@@ -14,17 +15,26 @@ import UserRoutes from "./UserRoutes";
 const Routes = () => {
   const user = useTypedSelector(selectCurrentUser);
   const token = useTypedSelector(selectCurrentToken);
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     const auth: AuthStateType | null = decryptData("auth");
 
     if (!auth) {
+      setIsLoading(true);
+
       return;
     }
 
+    setIsLoading(true);
+
     dispatch(initCredentials(auth));
   }, [dispatch]);
+
+  if (!isLoading) {
+    return <LoadingScreen />;
+  }
 
   if (token && user?.roles.includes("admin")) {
     return <AdminRoutes />;

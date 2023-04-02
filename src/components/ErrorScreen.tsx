@@ -5,7 +5,7 @@ interface ErrorWithMessage extends Error {
   statusText?: string;
 }
 
-const ErrorPage = () => {
+const ErrorScreen = () => {
   const error = useRouteError() as ErrorWithMessage;
 
   return (
@@ -19,4 +19,4 @@ const ErrorPage = () => {
   );
 };
 
-export default ErrorPage;
+export default ErrorScreen;

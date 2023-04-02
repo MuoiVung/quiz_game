@@ -1,25 +1,32 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import ErrorPage from "../components/ErrorPage";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
+import ErrorScreen from "../components/ErrorScreen";
+import Wrapper from "../layout/Wrapper";
 import AdminScreen from "../views/AdminScreen";
 import ManagementScreen from "../views/ManagementScreen";
-import PlayScreen from "../views/PlayScreen";
+import { sharedRoutes } from "./config";
 
 const router = createBrowserRouter([
   {
-    errorElement: <ErrorPage />,
+    element: <Wrapper />,
+    errorElement: <ErrorScreen />,
     children: [
       {
         path: "/",
-        element: <AdminScreen />,
+        element: <Navigate to="/admin" replace />,
       },
       {
-        path: "/play",
-        element: <PlayScreen />,
+        path: "/admin",
+        element: <AdminScreen />,
       },
       {
         path: "/management",
         element: <ManagementScreen />,
       },
+      ...sharedRoutes,
     ],
   },
 ]);
