@@ -7,18 +7,12 @@ import {
   MenuItem,
   Toolbar,
 } from "@mui/material";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import { useLogoutMutation } from "../api/AuthAPI";
 import IconSvg from "../components/IconSvg";
 import COLORS from "../constants/colors";
-import {
-  logout,
-  selectCurrentUser,
-  selectRefreshToken,
-} from "../store/features/authSlice";
+import { logout, selectCurrentUser } from "../store/features/authSlice";
 import { useTypedSelector } from "../store/store";
 
 const Navbar = () => {
@@ -26,36 +20,25 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const user = useTypedSelector(selectCurrentUser);
   const navigate = useNavigate();
-  const [logoutMutation, { isLoading }] = useLogoutMutation();
-  const refreshToken = useTypedSelector(selectRefreshToken);
 
   const handleMenuOpen = (event: any) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleMenuClose = () => {
+  const handleNavigateProfile = () => {
     setAnchorEl(null);
     navigate("/profile", { replace: true });
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
   };
 
   const handleLogout = async () => {
     setAnchorEl(null);
     dispatch(logout());
-    navigate("/", { replace: true });
-    // try {
-    //   if (refreshToken) {
-    //     await logoutMutation({ refresh_token: refreshToken });
-    //   }
-    //   dispatch(logout());
-    //   navigate("/", { replace: true });
-    // } catch (error) {
-    //   let errorMessage = "Logout error. Something went wrong!";
-
-    //   toast.error(errorMessage, {
-    //     position: "top-center",
-    //   });
-    // }
   };
+
   return (
     <AppBar
       position="sticky"
@@ -71,7 +54,7 @@ const Navbar = () => {
           my: 1,
         }}
       >
-        <Link to="/" replace>
+        <Link to={user?.roles.includes("admin") ? "admin" : "play"} replace>
           <IconSvg name="brand" width={136} height={32} />
         </Link>
 
@@ -84,7 +67,7 @@ const Navbar = () => {
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
           >
-            <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+            <MenuItem onClick={handleNavigateProfile}>Profile</MenuItem>
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
           </Menu>
         </Box>
@@ -93,4 +76,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default memo(Navbar);

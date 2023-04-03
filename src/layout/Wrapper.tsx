@@ -1,13 +1,11 @@
 import { Box } from "@mui/system";
-import React from "react";
-import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 
-const Wrapper = () => {
+const Wrapper = ({ children }: { children?: React.ReactNode }) => {
   return (
     <Box component="main">
       <Navbar />
-      <Outlet />
+      {children}
     </Box>
   );
 };

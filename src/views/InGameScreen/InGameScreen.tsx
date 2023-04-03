@@ -1,75 +1,3 @@
-// import {
-//   Box,
-//   Container,
-//   Grid,
-//   List,
-//   ListItem,
-//   Typography,
-// } from "@mui/material";
-// import { useState } from "react";
-// import { useParams } from "react-router-dom";
-// import { useGetPlayQuestionsQuery } from "../../api/QuestionsAPI";
-// import LoadingScreen from "../../components/LoadingScreen";
-// import QuestionScreen from "../../components/QuestionScreen";
-// import COLORS from "../../constants/colors";
-// import AnswerItem from "./AnswerItem";
-
-// const InGameScreen = () => {
-//   const { totalQuestions } = useParams<{ totalQuestions: string }>();
-//   const { data: playQuestions, isLoading } = useGetPlayQuestionsQuery({
-//     total: totalQuestions || "",
-//   });
-
-//   const [currentQuestion, setCurrentQuestion] = useState(0);
-
-//   if (isLoading) {
-//     return <LoadingScreen />;
-//   }
-
-//   return (
-//     <Box component="main">
-//       {/* START: QUESTION */}
-//       <Box
-//         height={200}
-//         sx={{
-//           display: "flex",
-//           justifyContent: "center",
-//           backgroundColor: COLORS.YELLOW,
-//           alignItems: "center",
-//         }}
-//       >
-//         <Typography fontSize={32} color={COLORS.WHITE}>
-//           {playQuestions?.data[currentQuestion].title}
-//         </Typography>
-//       </Box>
-//       {/* END: QUESTION */}
-//       {/* START: ANSWER */}
-//       <Box sx={{ py: "24px", px: "48px" }}>
-//         <Box sx={{ display: "flex" }}>
-//           <AnswerItem>
-//             {playQuestions?.data[currentQuestion].answers[0].content}
-//           </AnswerItem>
-//           <AnswerItem>
-//             {playQuestions?.data[currentQuestion].answers[1].content}
-//           </AnswerItem>
-//           <AnswerItem>
-//             {playQuestions?.data[currentQuestion].answers[2].content}
-//           </AnswerItem>
-//           <AnswerItem>
-//             {playQuestions?.data[currentQuestion].answers[3].content}
-//           </AnswerItem>
-//         </Box>
-//         {/* END: ANSWER*/}
-//         {/* START: BUTTON PANEL*/}
-//         {/* END: BUTTON PANEL */}
-//       </Box>
-//       <QuestionScreen />
-//     </Box>
-//   );
-// };
-
-// export default InGameScreen;
-
 import {
   Box,
   Button,
@@ -91,6 +19,7 @@ import {
 } from "../../api/QuestionsAPI/types";
 import LoadingScreen from "../../components/LoadingScreen";
 import COLORS from "../../constants/colors";
+import ResultTable from "./ResultTable";
 
 const defaultSubmitQuestionsRequest: SubmitQuestionsRequest = {
   listQuestionSubmitted: [],
@@ -99,9 +28,9 @@ const defaultSubmitQuestionsRequest: SubmitQuestionsRequest = {
 function InGameScreen() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState<null | number>(null);
+
   const [submittedQuestions, setSubmittedQuetions] =
     useState<SubmitQuestionsRequest>(defaultSubmitQuestionsRequest);
-
   const { totalQuestions } = useParams<{ totalQuestions: string }>();
   const { data, isLoading } = useGetPlayQuestionsQuery({
     total: totalQuestions || "",
@@ -138,8 +67,14 @@ function InGameScreen() {
       id: questions[currentQuestion].id,
       answersSubmittedId: [selectedOption],
     };
+
     if (currentQuestion === questions.length - 1) {
-      submitQuestions(submittedQuestions);
+      submitQuestions({
+        listQuestionSubmitted: [
+          ...submittedQuestions.listQuestionSubmitted,
+          answeredQuestion,
+        ],
+      });
     } else {
       setSubmittedQuetions((curr) => ({
         listQuestionSubmitted: [
@@ -221,25 +156,22 @@ function InGameScreen() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            height: "50vh",
           }}
         >
           <Box>
             <Typography variant="h4">Quiz Complete!</Typography>
-            <Typography variant="h6" sx={{ mt: 2 }}>
-              Your score is {submitResponseData?.data.totalScore}.
-            </Typography>
-            <Button variant="contained" fullWidth sx={{ mt: "16px" }}>
-              <Link
-                to="/play"
-                replace
-                style={{
-                  textDecoration: "none",
-                  color: COLORS.WHITE,
-                }}
-              >
-                Play Again
-              </Link>
+            {/* <Typography variant="h6" sx={{ mt: 2 }}>
+              Your score is {submitResponseData?.totalScore}.
+            </Typography> */}
+            {data && <ResultTable data={submitResponseData} />}
+            <Button
+              variant="contained"
+              fullWidth
+              sx={{ mt: "16px", zIndex: 999, color: COLORS.WHITE }}
+              component={Link}
+              to="/play"
+            >
+              Play Again
             </Button>
           </Box>
         </Box>

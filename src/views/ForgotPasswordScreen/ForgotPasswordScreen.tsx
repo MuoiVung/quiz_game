@@ -131,7 +131,7 @@ const ForgotPasswordScreen = () => {
             </Typography>
           </Link>
 
-          <Link to="/" style={{ textDecoration: "none" }}>
+          <Link to="/login" style={{ textDecoration: "none" }}>
             <Typography color="primary" sx={{ textDecoration: "underline" }}>
               Already have an account? Login here!
             </Typography>
