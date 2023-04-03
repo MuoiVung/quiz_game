@@ -47,6 +47,16 @@ export interface SubmitQuestionsData {
   totalScore: number;
 }
 
+export interface TransformSubmitQuestionsResponse {
+  answers: TransformCorrectAnswer[];
+  totalScore: number;
+}
+export interface TransformCorrectAnswer {
+  question: string;
+  answers: string[];
+  correctAnswers: string[];
+}
+
 export interface ListQuestionChecked {
   id: number;
   title: string;

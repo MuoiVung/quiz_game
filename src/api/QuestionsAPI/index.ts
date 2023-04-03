@@ -4,6 +4,8 @@ import {
   GetPlayQuestionsResponse,
   SubmitQuestionsRequest,
   SubmitQuestionsResponse,
+  TransformCorrectAnswer,
+  TransformSubmitQuestionsResponse,
 } from "./types";
 
 export const questionsApiSlice = apiSlice.injectEndpoints({
@@ -15,7 +17,7 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
       query: (arg) => `questions/play?total=${arg.total}`,
     }),
     submitQuestions: builder.mutation<
-      SubmitQuestionsResponse,
+      TransformSubmitQuestionsResponse,
       SubmitQuestionsRequest
     >({
       query: (body) => ({
@@ -23,6 +25,37 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
+      transformResponse: (response: SubmitQuestionsResponse) => {
+        const { data } = response;
+
+        const answers: TransformCorrectAnswer[] = data.listQuestionChecked.map(
+          (checkedQuestion) => {
+            const { title, answers } = checkedQuestion;
+            const answerContents: string[] = [];
+            const correctAnswerContents: string[] = [];
+
+            for (const ans of answers) {
+              if (ans.hasOwnProperty("is_submit_correct")) {
+                answerContents.push(ans.content);
+              }
+              if (ans.is_correct) {
+                correctAnswerContents.push(ans.content);
+              }
+            }
+
+            return {
+              question: title,
+              answers: answerContents,
+              correctAnswers: correctAnswerContents,
+            };
+          }
+        );
+
+        return {
+          answers,
+          totalScore: data.totalScore,
+        };
+      },
     }),
   }),
 });
