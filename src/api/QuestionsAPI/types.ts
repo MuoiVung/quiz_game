@@ -3,13 +3,26 @@ export interface GetPlayQuestionsRequest {
   total: string;
 }
 
+// GET ALL QUESTIONS
+
+export type SortFieldType = "id" | "title" | "createdAt" | "updatedAt";
+export type OrderType = "ASC" | "DESC";
+
+export interface GetAllQuestionsRequest {
+  sortField: SortFieldType;
+  keyWord: string;
+  order: OrderType;
+  size: string;
+  page: string;
+}
+
 export interface GetPlayQuestionsResponse {
   statusCode: number;
   message: string;
-  data: Data[];
+  data: GetAllQuestionsData[];
 }
 
-export interface Data {
+export interface GetAllQuestionsData {
   id: number;
   title: string;
   thumbnail_link: string;
@@ -73,4 +86,34 @@ export interface Answer {
   content: string;
   is_correct: boolean;
   is_submit_correct?: boolean;
+}
+
+export interface GetAllQuestionsResponse {
+  statusCode: number;
+  message: string;
+  data: GetAllQuestionsData;
+}
+
+export interface GetAllQuestionsData {
+  total: number;
+  result: Result[];
+  totalPages: number;
+  currentPage: number;
+}
+
+export interface Result {
+  id: number;
+  title: string;
+  thumbnail_link: string;
+  createdAt: string;
+  updatedAt: string;
+  answers: Answer[];
+}
+
+export interface Answer {
+  id: number;
+  content: string;
+  is_correct: boolean;
+  createdAt: string;
+  updatedAt: string;
 }

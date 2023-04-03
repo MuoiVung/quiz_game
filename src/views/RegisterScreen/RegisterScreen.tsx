@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as yup from "yup";
-import { useLoginMutation, useSignupMutation } from "../../api/AuthAPI";
+import { useSignupMutation } from "../../api/AuthAPI";
 import { ErrorResponseType } from "../../api/AuthAPI/types";
 
 import IconSvg from "../../components/IconSvg";
@@ -187,7 +187,7 @@ const RegisterScreen = () => {
             </Typography>
           </Link>
 
-          <Link to="/" style={{ textDecoration: "none" }}>
+          <Link to="/login" style={{ textDecoration: "none" }}>
             <Typography color="primary" sx={{ textDecoration: "underline" }}>
               Already have an account? Login here!
             </Typography>
