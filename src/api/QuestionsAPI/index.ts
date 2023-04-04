@@ -1,5 +1,8 @@
 import apiSlice from "..";
 import {
+  AddNewQuestionRequest,
+  AddNewQuestionResponse,
+  GetAllQuestionsData,
   GetAllQuestionsRequest,
   GetAllQuestionsResponse,
   GetPlayQuestionsRequest,
@@ -60,21 +63,30 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
       },
     }),
     getAllQuestions: builder.query<
-      GetAllQuestionsResponse,
+      GetAllQuestionsData,
       Partial<GetAllQuestionsRequest>
     >({
-      query: (arg = {}) => {
-        // Check if any of the properties in arg exist
-        const hasQueryParams = Object.values(arg).some(
-          (value) => value != null
-        );
-        if (hasQueryParams) {
-          // Combine the properties in arg with the `questions/play` string
-          const queryParams = new URLSearchParams(arg).toString();
-          return `questions/${queryParams ? `?${queryParams}` : ""}`;
-        }
-        return `questions`;
+      query: (params) => ({
+        url: "questions",
+        method: "GET",
+        params,
+      }),
+      transformResponse: (response: GetAllQuestionsResponse) => {
+        return response.data;
       },
+      providesTags: [{ type: "Question", id: "LIST" }],
+      keepUnusedDataFor: 600000,
+    }),
+    addNewQuestion: builder.mutation<
+      AddNewQuestionResponse,
+      AddNewQuestionRequest
+    >({
+      query: (body) => ({
+        url: "questions",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: [{ type: "Question", id: "LIST" }],
     }),
   }),
 });
@@ -83,4 +95,5 @@ export const {
   useGetPlayQuestionsQuery,
   useSubmitQuestionsMutation,
   useGetAllQuestionsQuery,
+  useAddNewQuestionMutation,
 } = questionsApiSlice;

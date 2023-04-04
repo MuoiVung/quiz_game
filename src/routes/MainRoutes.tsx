@@ -29,7 +29,6 @@ const MainRoutes = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    console.log("routes useEffect");
     const auth: AuthStateType | null = decryptData("auth");
 
     if (!auth) {
