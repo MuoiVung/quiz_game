@@ -3,6 +3,24 @@ export interface GetPlayQuestionsRequest {
   total: string;
 }
 
+export interface GetPlayQuestionsResponse {
+  statusCode: number;
+  message: string;
+  data: GetPlayQuestionData[];
+}
+
+export interface GetPlayQuestionData {
+  id: number;
+  title: string;
+  thumbnail_link: string;
+  answers: GetPlayQuestionAnswer[];
+}
+
+export interface GetPlayQuestionAnswer {
+  id: number;
+  content: string;
+}
+
 // GET ALL QUESTIONS
 
 export type SortFieldType = "id" | "title" | "createdAt" | "updatedAt";
@@ -12,26 +30,38 @@ export interface GetAllQuestionsRequest {
   sortField: SortFieldType;
   keyWord: string;
   order: OrderType;
-  size: string;
-  page: string;
+  size: number;
+  page: number;
 }
 
-export interface GetPlayQuestionsResponse {
+export interface GetAllQuestionsResponse {
   statusCode: number;
   message: string;
-  data: GetAllQuestionsData[];
+  data: GetAllQuestionsData;
 }
 
 export interface GetAllQuestionsData {
+  total: number;
+  result: GetAllQuestionsResult[];
+  totalPages: number;
+  currentPage: number;
+}
+
+export interface GetAllQuestionsResult {
   id: number;
   title: string;
   thumbnail_link: string;
-  answers: Answer[];
+  createdAt: string;
+  updatedAt: string;
+  answers: GetAllQuestionAnswer[];
 }
 
-export interface Answer {
+export interface GetAllQuestionAnswer {
   id: number;
   content: string;
+  is_correct: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // SUBMIT QUESTIONS
@@ -74,46 +104,33 @@ export interface ListQuestionChecked {
   id: number;
   title: string;
   thumbnail_link: string;
-  answers: Answer[];
+  answers: ListQuestionCheckedAnswer[];
   numberSubmitCorrect: number;
   numberSubmitIncorrect: number;
   numberAnswersCorrect: number;
   scoreThisQuestion: number;
 }
 
-export interface Answer {
+export interface ListQuestionCheckedAnswer {
   id: number;
   content: string;
   is_correct: boolean;
   is_submit_correct?: boolean;
 }
 
-export interface GetAllQuestionsResponse {
-  statusCode: number;
-  message: string;
-  data: GetAllQuestionsData;
-}
-
-export interface GetAllQuestionsData {
-  total: number;
-  result: Result[];
-  totalPages: number;
-  currentPage: number;
-}
-
-export interface Result {
-  id: number;
+// ADD QUESTION
+export interface AddNewQuestionRequest {
   title: string;
   thumbnail_link: string;
-  createdAt: string;
-  updatedAt: string;
-  answers: Answer[];
 }
 
-export interface Answer {
-  id: number;
-  content: string;
-  is_correct: boolean;
-  createdAt: string;
-  updatedAt: string;
+export interface AddNewQuestionResponse {
+  statusCode: number;
+  message: string;
+  data: {
+    title: string;
+    id: number;
+    createAt: string;
+    updateAt: string;
+  };
 }
