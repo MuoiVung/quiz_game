@@ -17,3 +17,8 @@ export type AddQuestionFormType = {
   answer4: string;
   answerCorrect: 1 | 2 | 3 | 4;
 };
+
+export type QuestionModalProps = {
+  isOpen: boolean;
+  onCloseModal: () => void;
+};

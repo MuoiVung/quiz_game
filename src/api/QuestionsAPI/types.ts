@@ -134,3 +134,13 @@ export interface AddNewQuestionResponse {
     updateAt: string;
   };
 }
+
+// DELETE QUESTION
+export interface DeleteQuestionRequest {
+  questionId: number;
+}
+
+export interface DeleteQuestionResponse {
+  statusCode: number;
+  message: string;
+}

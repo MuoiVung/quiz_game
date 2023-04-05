@@ -2,6 +2,8 @@ import apiSlice from "..";
 import {
   AddNewQuestionRequest,
   AddNewQuestionResponse,
+  DeleteQuestionRequest,
+  DeleteQuestionResponse,
   GetAllQuestionsData,
   GetAllQuestionsRequest,
   GetAllQuestionsResponse,
@@ -74,7 +76,16 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
       transformResponse: (response: GetAllQuestionsResponse) => {
         return response.data;
       },
-      providesTags: [{ type: "Question", id: "LIST" }],
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.result.map(({ id }) => ({
+                type: "Question" as const,
+                id,
+              })),
+              { type: "Question", id: "LIST" },
+            ]
+          : [{ type: "Question", id: "LIST" }],
       keepUnusedDataFor: 600000,
     }),
     addNewQuestion: builder.mutation<
@@ -88,6 +99,18 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: [{ type: "Question", id: "LIST" }],
     }),
+    deleteQuestion: builder.mutation<
+      DeleteQuestionResponse,
+      DeleteQuestionRequest
+    >({
+      query: ({ questionId }) => ({
+        url: `questions/${questionId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Question", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -96,4 +119,5 @@ export const {
   useSubmitQuestionsMutation,
   useGetAllQuestionsQuery,
   useAddNewQuestionMutation,
+  useDeleteQuestionMutation,
 } = questionsApiSlice;

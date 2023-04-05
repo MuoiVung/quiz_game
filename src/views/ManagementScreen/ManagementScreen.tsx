@@ -1,6 +1,8 @@
-import { yupResolver } from "@hookform/resolvers/yup";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import BorderColorOutlinedIcon from "@mui/icons-material/BorderColorOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import SearchIcon from "@mui/icons-material/Search";
+import { LoadingButton } from "@mui/lab";
 import {
   Box,
   Button,
@@ -18,22 +20,28 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridCellParams,
+  GridColDef,
+  GridRowsProp,
+} from "@mui/x-data-grid";
 import dayjs from "dayjs";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import * as yup from "yup";
-
-import { LoadingButton } from "@mui/lab";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+
+import { useAddNewAnswerMutation } from "../../api/AnswersAPI";
 import {
   useAddNewQuestionMutation,
+  useDeleteQuestionMutation,
   useGetAllQuestionsQuery,
 } from "../../api/QuestionsAPI";
 import CustomModal from "../../components/CustomModal";
 import COLORS from "../../constants/colors";
 import { AddQuestionFormType, QuestionRowType } from "./types";
-import { useAddNewAnswerMutation } from "../../api/AnswersAPI";
 
 const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   "& .MuiDataGrid-columnHeaderTitle": {
@@ -43,43 +51,6 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     fontWeight: "bold",
   },
 }));
-
-const columns: GridColDef[] = [
-  {
-    field: "seq",
-    headerName: "Seq",
-    minWidth: 100,
-  },
-  {
-    field: "title",
-    headerName: "Title",
-    minWidth: 150,
-    flex: 1,
-  },
-  { field: "createdDay", headerName: "Created Day", minWidth: 150, flex: 0.5 },
-  {
-    field: "thumbnail",
-    headerName: "Thumbnail",
-    minWidth: 200,
-    flex: 0.5,
-    renderCell: (params) =>
-      params.value ? (
-        <img
-          src={params.value}
-          alt="thumbnail"
-          style={{
-            width: 60,
-            height: 60,
-            padding: "12px",
-            borderRadius: "50%",
-            objectFit: "cover",
-          }}
-        />
-      ) : (
-        <p>No thumbnail</p>
-      ),
-  },
-];
 
 const defaultAddQuestion: AddQuestionFormType = {
   title: "",
@@ -123,6 +94,7 @@ const ManagementScreen = () => {
     data: questionsData,
     isLoading: isGetAllQuestionsLoading,
     isFetching: isGetAllQuestionsFetching,
+    refetch: getAllQuestionsRefetch,
   } = useGetAllQuestionsQuery({
     page: paginationModel.page + 1,
     size: paginationModel.pageSize,
@@ -132,16 +104,112 @@ const ManagementScreen = () => {
     useAddNewQuestionMutation();
   const [addNewAnswers, { isLoading: isAddNewAnswerLoading }] =
     useAddNewAnswerMutation();
+  const [deleteQuestion] = useDeleteQuestionMutation();
 
   const [rowCountState, setRowCountState] = useState(questionsData?.total || 0);
 
-  useEffect(() => {
-    setRowCountState((prevRowCountState) =>
-      questionsData?.total !== undefined
-        ? questionsData?.total
-        : prevRowCountState
-    );
-  }, [questionsData?.total]);
+  const handleDeleteQuestion = useCallback(
+    async (questionId: number) => {
+      try {
+        await deleteQuestion({ questionId });
+        if (
+          questionsData?.currentPage === questionsData?.totalPages &&
+          (questionsData?.total || 0) % paginationModel.pageSize === 1
+        ) {
+          setPaginationModel((prev) => ({ ...prev, page: prev.page - 1 }));
+        }
+
+        toast.success("Delete the question successfully.");
+      } catch (error) {
+        toast.error("Failed to delete this question. Please try again later.");
+      }
+    },
+    [
+      deleteQuestion,
+      questionsData?.currentPage,
+      questionsData?.totalPages,
+      questionsData?.total,
+      paginationModel.pageSize,
+    ]
+  );
+
+  const columns: GridColDef[] = useMemo(
+    () => [
+      {
+        field: "seq",
+        headerName: "Seq",
+        minWidth: 100,
+      },
+      {
+        field: "title",
+        headerName: "Title",
+        minWidth: 150,
+        flex: 3,
+      },
+      {
+        field: "createdDay",
+        headerName: "Created Day",
+        minWidth: 150,
+        flex: 2,
+      },
+      {
+        field: "thumbnail",
+        headerName: "Thumbnail",
+        minWidth: 200,
+        flex: 1,
+        renderCell: (params: GridCellParams) =>
+          params.value ? (
+            <img
+              src={params.value.toString()}
+              alt="thumbnail"
+              style={{
+                width: 60,
+                height: 60,
+                padding: "12px",
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
+          ) : (
+            <p>No thumbnail</p>
+          ),
+      },
+      {
+        field: "actions",
+        headerName: "Actions",
+        minWidth: 150,
+        flex: 1,
+        renderCell: (params: GridCellParams) => (
+          <Box
+            sx={{
+              display: "flex",
+            }}
+          >
+            <IconButton
+              sx={{
+                color: COLORS.BLUE,
+              }}
+            >
+              <BorderColorOutlinedIcon />
+            </IconButton>
+
+            <IconButton
+              sx={{
+                ml: "8px",
+                color: COLORS.RED,
+              }}
+              onClick={() => {
+                handleDeleteQuestion(+params.id);
+              }}
+            >
+              <DeleteOutlineOutlinedIcon />
+            </IconButton>
+          </Box>
+        ),
+      },
+    ],
+    [handleDeleteQuestion]
+  );
 
   const transformQuestionsData: GridRowsProp<QuestionRowType> = useMemo(() => {
     if (!questionsData?.result) {
@@ -156,6 +224,14 @@ const ManagementScreen = () => {
       thumbnail: question.thumbnail_link || "",
     }));
   }, [questionsData?.result, paginationModel.page, paginationModel.pageSize]);
+
+  useEffect(() => {
+    setRowCountState((prevRowCountState) =>
+      questionsData?.total !== undefined
+        ? questionsData?.total
+        : prevRowCountState
+    );
+  }, [questionsData?.total]);
 
   const handleSelectType = (event: SelectChangeEvent) => {
     setType(event.target.value);
@@ -240,6 +316,7 @@ const ManagementScreen = () => {
         <IconButton size="large" onClick={handleOpenAddQuestionModal}>
           <AddCircleIcon sx={{ fontSize: 48, color: COLORS.YELLOW }} />
         </IconButton>
+        <Button onClick={getAllQuestionsRefetch}>Refetch</Button>
         {/* End: Search - Add new Question/User */}
       </Box>
       {/* Table */}
@@ -250,7 +327,15 @@ const ManagementScreen = () => {
           rows={transformQuestionsData}
           rowCount={rowCountState}
           pageSizeOptions={[5]}
-          paginationModel={paginationModel}
+          paginationModel={{
+            page: questionsData?.totalPages
+              ? questionsData.totalPages <= paginationModel.page
+                ? paginationModel.page - 1
+                : paginationModel.page
+              : paginationModel.page,
+            pageSize: paginationModel.pageSize,
+          }}
+          // paginationModel={paginationModel}
           loading={isGetAllQuestionsLoading || isGetAllQuestionsFetching}
           onPaginationModelChange={setPaginationModel}
           paginationMode="server"
