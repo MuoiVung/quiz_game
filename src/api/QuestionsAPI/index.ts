@@ -9,10 +9,14 @@ import {
   GetAllQuestionsResponse,
   GetPlayQuestionsRequest,
   GetPlayQuestionsResponse,
+  GetQuestionRequest,
+  GetQuestionResponse,
   SubmitQuestionsRequest,
   SubmitQuestionsResponse,
   TransformCorrectAnswer,
   TransformSubmitQuestionsResponse,
+  UpdateQuestionRequest,
+  UpdateQuestionResponse,
 } from "./types";
 
 export const questionsApiSlice = apiSlice.injectEndpoints({
@@ -111,6 +115,28 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
         { type: "Question", id: "LIST" },
       ],
     }),
+    getQuestion: builder.query<GetQuestionResponse, GetQuestionRequest>({
+      query: ({ questionId }) => `questions/${questionId}`,
+      providesTags: (result, error, arg) => [
+        { type: "Question", id: arg.questionId },
+      ],
+    }),
+    updateQuestion: builder.mutation<
+      UpdateQuestionResponse,
+      UpdateQuestionRequest
+    >({
+      query: ({ questionId, title, thumbnail_link }) => ({
+        url: `questions/${questionId}`,
+        method: "PATCH",
+        body: {
+          title,
+          thumbnail_link,
+        },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Question", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -118,6 +144,8 @@ export const {
   useGetPlayQuestionsQuery,
   useSubmitQuestionsMutation,
   useGetAllQuestionsQuery,
+  useGetQuestionQuery,
   useAddNewQuestionMutation,
   useDeleteQuestionMutation,
+  useUpdateQuestionMutation,
 } = questionsApiSlice;

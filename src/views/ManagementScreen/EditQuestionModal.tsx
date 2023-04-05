@@ -12,16 +12,26 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import * as yup from "yup";
-import { AddQuestionFormType, QuestionModalProps } from "./types";
+import { AddQuestionFormType, EditQuestionModalProps } from "./types";
 
 import { LoadingButton } from "@mui/lab";
-import { useAddNewAnswerMutation } from "../../api/AnswersAPI";
-import { useAddNewQuestionMutation } from "../../api/QuestionsAPI";
+import { useEffect, useState } from "react";
+import {
+  useAddNewAnswerMutation,
+  useUpdateAnswerMutation,
+} from "../../api/AnswersAPI";
+import {
+  useAddNewQuestionMutation,
+  useGetQuestionQuery,
+  useUpdateQuestionMutation,
+} from "../../api/QuestionsAPI";
 import CustomModal from "../../components/CustomModal";
+import LoadingScreen from "../../components/LoadingScreen";
 import COLORS from "../../constants/colors";
+import { UpdateAnswerRequest } from "../../api/AnswersAPI/types";
 
 const defaultAddQuestion: AddQuestionFormType = {
-  title: "",
+  title: "2",
   thumbnailLink: "",
   answer1: "",
   answer2: "",
@@ -40,7 +50,20 @@ const questionValidateSchema = yup
   })
   .required();
 
-const QuestionModal = ({ isOpen, onCloseModal }: QuestionModalProps) => {
+const EditQuestionModal = ({
+  isOpen,
+  onCloseModal,
+  questionId,
+}: EditQuestionModalProps) => {
+  //   const [questionDefaultValues, setQuestionDefaultValues] =
+  //     useState<AddQuestionFormType | null>(null);
+
+  const {
+    data: questionData,
+    isLoading,
+    isFetching,
+  } = useGetQuestionQuery({ questionId });
+
   const {
     register,
     handleSubmit,
@@ -52,38 +75,73 @@ const QuestionModal = ({ isOpen, onCloseModal }: QuestionModalProps) => {
     defaultValues: defaultAddQuestion,
   });
 
-  const [addNewQuestion, { isLoading: isAddNewQuestionLoading }] =
-    useAddNewQuestionMutation();
+  useEffect(() => {
+    if (questionData) {
+      const { data } = questionData;
+      const defaultValues = {
+        title: data.title,
+        thumbnailLink: data.thumbnail_link,
+        answer1: data.answers[0]?.content || "",
+        answer2: data.answers[1]?.content || "",
+        answer3: data.answers[2]?.content || "",
+        answer4: data.answers[3]?.content || "",
+        answerCorrect:
+          data.answers.findIndex((answer) => answer.is_correct) + 1,
+      };
 
-  const [addNewAnswers, { isLoading: isAddNewAnswerLoading }] =
-    useAddNewAnswerMutation();
+      reset(defaultValues);
+    }
+  }, [questionData, reset]);
 
-  const handleAddQuestion = async (data: AddQuestionFormType) => {
+  const [updateQuestion, { isLoading: isUpdateQuestionLoading }] =
+    useUpdateQuestionMutation();
+
+  const [updateAnswer, { isLoading: isUpdateAnswerLoading }] =
+    useUpdateAnswerMutation();
+
+  const handleEditQuestion = async (formData: AddQuestionFormType) => {
     try {
       const {
-        data: { id: questionId },
-      } = await addNewQuestion({
-        title: data.title,
-        thumbnail_link: data.thumbnailLink || "",
+        data: { answers: answersData },
+      } = await updateQuestion({
+        title: formData.title,
+        thumbnail_link: formData.thumbnailLink || "",
+        questionId,
       }).unwrap();
 
       const answers = [
-        { content: data.answer1, is_correct: 1 === +data.answerCorrect },
-        { content: data.answer2, is_correct: 2 === +data.answerCorrect },
-        { content: data.answer3, is_correct: 3 === +data.answerCorrect },
-        { content: data.answer4, is_correct: 4 === +data.answerCorrect },
+        {
+          content: formData.answer1,
+          is_correct: 1 === +formData.answerCorrect,
+          answerId: answersData[0].id,
+        },
+        {
+          content: formData.answer2,
+          is_correct: 2 === +formData.answerCorrect,
+          answerId: answersData[1].id,
+        },
+        {
+          content: formData.answer3,
+          is_correct: 3 === +formData.answerCorrect,
+          answerId: answersData[2].id,
+        },
+        {
+          content: formData.answer4,
+          is_correct: 4 === +formData.answerCorrect,
+          answerId: answersData[3].id,
+        },
       ];
 
       const promises = answers.map((answer) =>
-        addNewAnswers({ ...answer, questionId })
+        updateAnswer({ ...answer, questionId }).unwrap()
       );
 
       await Promise.all(promises);
-      toast.success("Add new question successuflly!");
+      toast.success("Edit question successuflly!");
       reset();
       onCloseModal();
     } catch (error) {
-      toast.error("Failed to add new question!", {
+      toast.error("Failed to edit question!", {
         position: "top-center",
       });
     }
@@ -93,6 +151,10 @@ const QuestionModal = ({ isOpen, onCloseModal }: QuestionModalProps) => {
     reset();
     onCloseModal();
   };
+
+  if (isLoading || isFetching) {
+    return <LoadingScreen />;
+  }
 
   return (
     <CustomModal onClose={handleCloseModal} open={isOpen}>
@@ -104,10 +166,10 @@ const QuestionModal = ({ isOpen, onCloseModal }: QuestionModalProps) => {
           mb: "12px",
         }}
       >
-        Add Question
+        Edit Question
       </Typography>
       {/* START: ADD QUESTION FORM */}
-      <Box component="form" onSubmit={handleSubmit(handleAddQuestion)}>
+      <Box component="form" onSubmit={handleSubmit(handleEditQuestion)}>
         <TextField
           {...register("title")}
           required
@@ -220,7 +282,7 @@ const QuestionModal = ({ isOpen, onCloseModal }: QuestionModalProps) => {
         {/* Buttons */}
         <Box display="flex" justifyContent="flex-end" my="16px">
           <LoadingButton
-            loading={isAddNewQuestionLoading || isAddNewAnswerLoading}
+            loading={isUpdateQuestionLoading || isUpdateAnswerLoading}
             type="submit"
             variant="contained"
             sx={{ color: COLORS.WHITE, mr: "12px" }}
@@ -243,4 +305,4 @@ const QuestionModal = ({ isOpen, onCloseModal }: QuestionModalProps) => {
   );
 };
 
-export default QuestionModal;
+export default EditQuestionModal;
