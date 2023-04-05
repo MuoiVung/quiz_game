@@ -42,21 +42,21 @@ export interface GetAllQuestionsResponse {
 
 export interface GetAllQuestionsData {
   total: number;
-  result: GetAllQuestionsResult[];
+  result: QuestionData[];
   totalPages: number;
   currentPage: number;
 }
 
-export interface GetAllQuestionsResult {
+export interface QuestionData {
   id: number;
   title: string;
   thumbnail_link: string;
   createdAt: string;
   updatedAt: string;
-  answers: GetAllQuestionAnswer[];
+  answers: QuestionAnswers[];
 }
 
-export interface GetAllQuestionAnswer {
+export interface QuestionAnswers {
   id: number;
   content: string;
   is_correct: boolean;
@@ -133,4 +133,38 @@ export interface AddNewQuestionResponse {
     createAt: string;
     updateAt: string;
   };
+}
+
+// DELETE QUESTION
+export interface DeleteQuestionRequest {
+  questionId: number;
+}
+
+export interface DeleteQuestionResponse {
+  statusCode: number;
+  message: string;
+}
+
+// GET QUESTION
+export interface GetQuestionRequest {
+  questionId: number;
+}
+
+export interface GetQuestionResponse {
+  statusCode: number;
+  message: string;
+  data: QuestionData;
+}
+
+// UPDATE QUESTION
+export interface UpdateQuestionRequest {
+  title: string;
+  thumbnail_link: string;
+  questionId: number;
+}
+
+export interface UpdateQuestionResponse {
+  statusCode: number;
+  message: string;
+  data: QuestionData;
 }

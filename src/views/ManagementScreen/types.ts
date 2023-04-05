@@ -15,5 +15,18 @@ export type AddQuestionFormType = {
   answer2: string;
   answer3: string;
   answer4: string;
-  answerCorrect: 1 | 2 | 3 | 4;
+  answerCorrect: number;
 };
+
+export type QuestionModalProps = {
+  isOpen: boolean;
+  onCloseModal: () => void;
+};
+
+export type EditQuestionModalProps = {
+  isOpen: boolean;
+  onCloseModal: () => void;
+  questionId: number;
+};
+
+export type QuestionModalType = "edit" | "add";

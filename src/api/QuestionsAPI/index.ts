@@ -2,15 +2,21 @@ import apiSlice from "..";
 import {
   AddNewQuestionRequest,
   AddNewQuestionResponse,
+  DeleteQuestionRequest,
+  DeleteQuestionResponse,
   GetAllQuestionsData,
   GetAllQuestionsRequest,
   GetAllQuestionsResponse,
   GetPlayQuestionsRequest,
   GetPlayQuestionsResponse,
+  GetQuestionRequest,
+  GetQuestionResponse,
   SubmitQuestionsRequest,
   SubmitQuestionsResponse,
   TransformCorrectAnswer,
   TransformSubmitQuestionsResponse,
+  UpdateQuestionRequest,
+  UpdateQuestionResponse,
 } from "./types";
 
 export const questionsApiSlice = apiSlice.injectEndpoints({
@@ -74,7 +80,16 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
       transformResponse: (response: GetAllQuestionsResponse) => {
         return response.data;
       },
-      providesTags: [{ type: "Question", id: "LIST" }],
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.result.map(({ id }) => ({
+                type: "Question" as const,
+                id,
+              })),
+              { type: "Question", id: "LIST" },
+            ]
+          : [{ type: "Question", id: "LIST" }],
       keepUnusedDataFor: 600000,
     }),
     addNewQuestion: builder.mutation<
@@ -88,6 +103,40 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: [{ type: "Question", id: "LIST" }],
     }),
+    deleteQuestion: builder.mutation<
+      DeleteQuestionResponse,
+      DeleteQuestionRequest
+    >({
+      query: ({ questionId }) => ({
+        url: `questions/${questionId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Question", id: "LIST" },
+      ],
+    }),
+    getQuestion: builder.query<GetQuestionResponse, GetQuestionRequest>({
+      query: ({ questionId }) => `questions/${questionId}`,
+      providesTags: (result, error, arg) => [
+        { type: "Question", id: arg.questionId },
+      ],
+    }),
+    updateQuestion: builder.mutation<
+      UpdateQuestionResponse,
+      UpdateQuestionRequest
+    >({
+      query: ({ questionId, title, thumbnail_link }) => ({
+        url: `questions/${questionId}`,
+        method: "PATCH",
+        body: {
+          title,
+          thumbnail_link,
+        },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Question", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -95,5 +144,8 @@ export const {
   useGetPlayQuestionsQuery,
   useSubmitQuestionsMutation,
   useGetAllQuestionsQuery,
+  useGetQuestionQuery,
   useAddNewQuestionMutation,
+  useDeleteQuestionMutation,
+  useUpdateQuestionMutation,
 } = questionsApiSlice;

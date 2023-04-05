@@ -1,4 +1,9 @@
-import { AddNewAnswerResponse, AddNewAnswerRequest } from "./types";
+import {
+  AddNewAnswerResponse,
+  AddNewAnswerRequest,
+  UpdateAnswerResponse,
+  UpdateAnswerRequest,
+} from "./types";
 import apiSlice from "..";
 export const answersApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -10,7 +15,22 @@ export const answersApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: [{ type: "Question", id: "LIST" }],
     }),
+    updateAnswer: builder.mutation<UpdateAnswerResponse, UpdateAnswerRequest>({
+      query: ({ answerId, ...body }) => {
+        console.log("hello: ", answerId);
+        return {
+          url: `answers/${answerId}`,
+          method: "PATCH",
+          body,
+        };
+      },
+      invalidatesTags: (result, error, arg) => [
+        { type: "Question", id: arg.questionId },
+        { type: "Question", id: "LIST" },
+      ],
+    }),
   }),
 });
 
-export const { useAddNewAnswerMutation } = answersApiSlice;
+export const { useAddNewAnswerMutation, useUpdateAnswerMutation } =
+  answersApiSlice;
