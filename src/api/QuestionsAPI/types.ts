@@ -23,11 +23,11 @@ export interface GetPlayQuestionAnswer {
 
 // GET ALL QUESTIONS
 
-export type SortFieldType = "id" | "title" | "createdAt" | "updatedAt";
+export type QuestionSortFieldType = "id" | "title" | "createdAt" | "updatedAt";
 export type OrderType = "ASC" | "DESC";
 
 export interface GetAllQuestionsRequest {
-  sortField: SortFieldType;
+  sortField: QuestionSortFieldType;
   keyWord: string;
   order: OrderType;
   size: number;

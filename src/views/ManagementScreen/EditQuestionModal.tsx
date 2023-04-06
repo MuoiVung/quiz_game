@@ -59,7 +59,6 @@ const EditQuestionModal = ({
     register,
     handleSubmit,
     reset,
-    setValue,
     control,
     formState: { errors, isValid },
   } = useForm<AddQuestionFormType>({
@@ -91,7 +90,7 @@ const EditQuestionModal = ({
       setDefaultEditQuestionState(defaultValues);
       reset(defaultValues);
     }
-  }, [questionData, reset, setValue]);
+  }, [questionData, reset]);
 
   const [updateQuestion, { isLoading: isUpdateQuestionLoading }] =
     useUpdateQuestionMutation();

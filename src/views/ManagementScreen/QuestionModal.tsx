@@ -12,7 +12,7 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import * as yup from "yup";
-import { AddQuestionFormType, QuestionModalProps } from "./types";
+import { AddQuestionFormType, BasicModalProps } from "./types";
 
 import { LoadingButton } from "@mui/lab";
 import { useAddNewAnswerMutation } from "../../api/AnswersAPI";
@@ -40,7 +40,7 @@ const questionValidateSchema = yup
   })
   .required();
 
-const QuestionModal = ({ isOpen, onCloseModal }: QuestionModalProps) => {
+const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
   const {
     register,
     handleSubmit,

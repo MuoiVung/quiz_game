@@ -77,9 +77,7 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
         method: "GET",
         params,
       }),
-      transformResponse: (response: GetAllQuestionsResponse) => {
-        return response.data;
-      },
+      transformResponse: (response: GetAllQuestionsResponse) => response.data,
       providesTags: (result) =>
         result
           ? [
@@ -126,13 +124,10 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
       UpdateQuestionResponse,
       UpdateQuestionRequest
     >({
-      query: ({ questionId, title, thumbnail_link }) => ({
+      query: ({ questionId, ...body }) => ({
         url: `questions/${questionId}`,
         method: "PATCH",
-        body: {
-          title,
-          thumbnail_link,
-        },
+        body,
       }),
       invalidatesTags: (result, error, arg) => [
         { type: "Question", id: arg.questionId },

@@ -21,7 +21,7 @@ const AdminScreen = () => {
           Play
         </Button>
         <Button component={Link} to="/management" variant="contained">
-          Manage Questions
+          Management
         </Button>
       </Box>
     </Box>
