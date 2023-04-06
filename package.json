@@ -21,6 +21,7 @@
     "async-mutex": "^0.4.0",
     "crypto-js": "^4.1.1",
     "dayjs": "^1.11.7",
+    "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.43.8",
@@ -58,6 +59,7 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.1.1",
+    "@types/lodash": "^4.14.192",
     "dotenv": "^16.0.3"
   }
 }

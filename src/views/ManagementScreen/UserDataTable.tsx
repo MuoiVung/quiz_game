@@ -1,0 +1,245 @@
+import BorderColorOutlinedIcon from "@mui/icons-material/BorderColorOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import { Box, IconButton } from "@mui/material";
+import { GridCellParams, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import dayjs from "dayjs";
+import { toast } from "react-toastify";
+import {
+  useDeleteUserMutation,
+  useGetAllUsersQuery,
+  usersApiSlice,
+} from "../../api/UsersAPI";
+import COLORS from "../../constants/colors";
+import AddUserModal from "./AddUserModal";
+import DataTable from "./DataTable";
+import EditUserModal from "./EditUserModal";
+import { UserDataTableProps, UserRowType } from "./types";
+import store from "../../store/store";
+
+const UserDataTable = ({
+  paginationModel,
+  searchKeyWord,
+  listOrder,
+  sortField,
+  setPaginationModel,
+  isAddModalOpen,
+  onCloseAddModal,
+  editModalState,
+  onCloseEditModal,
+  onOpenEditModal,
+}: UserDataTableProps) => {
+  const {
+    data: usersData,
+    isLoading: isGetAllUsersLoading,
+    isFetching: isGetAllUsersFetching,
+  } = useGetAllUsersQuery({
+    page: paginationModel.page + 1,
+    size: paginationModel.pageSize,
+    keyWord: searchKeyWord,
+    order: listOrder,
+    sortField,
+  });
+
+  const [deleteUser] = useDeleteUserMutation();
+
+  const [rowCountState, setRowCountState] = useState(usersData?.total || 0);
+
+  const handleDeleteUser = useCallback(
+    async (userId: number) => {
+      try {
+        await deleteUser({ userId });
+        if (
+          usersData?.currentPage === usersData?.totalPages &&
+          (usersData?.total || 0) % paginationModel.pageSize === 1
+        ) {
+          setPaginationModel((prev) => ({ ...prev, page: prev.page - 1 }));
+        }
+
+        toast.success("Delete the question successfully.");
+      } catch (error) {
+        toast.error("Failed to delete this question. Please try again later.");
+      }
+    },
+    [
+      deleteUser,
+      paginationModel.pageSize,
+      usersData?.currentPage,
+      usersData?.total,
+      usersData?.totalPages,
+      setPaginationModel,
+    ]
+  );
+
+  const handleEditUser = useCallback(
+    async (userId: number) => {
+      const promise = store.dispatch(
+        usersApiSlice.endpoints.getUser.initiate({
+          userId,
+        })
+      );
+
+      await toast.promise(promise, {
+        pending: "Fetching user data...",
+        success: "User data fetched successfully!",
+        error: "Failed to fetch user data.",
+      });
+
+      onOpenEditModal(userId);
+    },
+    [onOpenEditModal]
+  );
+
+  const columns: GridColDef[] = useMemo(
+    () => [
+      {
+        field: "seq",
+        headerName: "Seq",
+        minWidth: 100,
+      },
+      {
+        field: "name",
+        headerName: "Name",
+        minWidth: 150,
+        flex: 2,
+      },
+      {
+        field: "email",
+        headerName: "Email",
+        minWidth: 150,
+        flex: 2,
+      },
+      {
+        field: "roles",
+        headerName: "Roles",
+        minWidth: 150,
+        flex: 1,
+      },
+      {
+        field: "createdDay",
+        headerName: "Created Day",
+        minWidth: 150,
+        flex: 1,
+      },
+      {
+        field: "updatedDay",
+        headerName: "Updated Day",
+        minWidth: 150,
+        flex: 1,
+      },
+      {
+        field: "avatar",
+        headerName: "Avatar",
+        minWidth: 200,
+        flex: 1,
+        renderCell: (params: GridCellParams) =>
+          params.value ? (
+            <img
+              src={params.value.toString()}
+              alt="thumbnail"
+              style={{
+                width: 60,
+                height: 60,
+                padding: "12px",
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
+          ) : (
+            <p>No thumbnail</p>
+          ),
+      },
+      {
+        field: "actions",
+        headerName: "Actions",
+        minWidth: 150,
+        flex: 1,
+        renderCell: (params: GridCellParams) => (
+          <Box
+            sx={{
+              display: "flex",
+            }}
+          >
+            <IconButton
+              sx={{
+                color: COLORS.BLUE,
+              }}
+              onClick={() => handleEditUser(+params.id)}
+            >
+              <BorderColorOutlinedIcon />
+            </IconButton>
+
+            <IconButton
+              sx={{
+                ml: "8px",
+                color: COLORS.RED,
+              }}
+              onClick={() => handleDeleteUser(+params.id)}
+            >
+              <DeleteOutlineOutlinedIcon />
+            </IconButton>
+          </Box>
+        ),
+      },
+    ],
+    [handleDeleteUser, handleEditUser]
+  );
+
+  const transformQuestionsData: GridRowsProp<UserRowType> = useMemo(() => {
+    if (!usersData?.result) {
+      return [];
+    }
+
+    return usersData?.result.map((user, index) => ({
+      id: user.id,
+      seq: index + paginationModel.page * paginationModel.pageSize + 1,
+      name: user.name,
+      email: user.email,
+      roles: user.roles.join(", "),
+      createdDay: dayjs(user.created_at).format("DD/MM/YYYY"),
+      updatedDay: dayjs(user.updated_at).format("DD/MM/YYYY"),
+      avatar: user.avatar_link || "",
+    }));
+  }, [usersData?.result, paginationModel.page, paginationModel.pageSize]);
+
+  useEffect(() => {
+    setRowCountState((prevRowCountState) =>
+      usersData?.total !== undefined ? usersData?.total : prevRowCountState
+    );
+  }, [usersData?.total]);
+
+  return (
+    <Box>
+      <DataTable
+        columns={columns}
+        rows={transformQuestionsData}
+        rowCount={rowCountState}
+        paginationModel={{
+          page: usersData?.totalPages
+            ? usersData.totalPages <= paginationModel.page
+              ? paginationModel.page - 1
+              : paginationModel.page
+            : paginationModel.page,
+          pageSize: paginationModel.pageSize,
+        }}
+        loading={isGetAllUsersLoading || isGetAllUsersFetching}
+        onPaginationModelChange={setPaginationModel}
+      />
+      {/* START:  Modal */}
+      {isAddModalOpen && (
+        <AddUserModal isOpen={isAddModalOpen} onCloseModal={onCloseAddModal} />
+      )}
+      {editModalState.open && (
+        <EditUserModal
+          isOpen={editModalState.open}
+          userId={editModalState.id}
+          onCloseModal={onCloseEditModal}
+        />
+      )}
+      {/* END: Modal */}
+    </Box>
+  );
+};
+
+export default UserDataTable;

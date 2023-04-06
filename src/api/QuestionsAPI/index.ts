@@ -77,9 +77,7 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
         method: "GET",
         params,
       }),
-      transformResponse: (response: GetAllQuestionsResponse) => {
-        return response.data;
-      },
+      transformResponse: (response: GetAllQuestionsResponse) => response.data,
       providesTags: (result) =>
         result
           ? [
@@ -90,7 +88,7 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
               { type: "Question", id: "LIST" },
             ]
           : [{ type: "Question", id: "LIST" }],
-      keepUnusedDataFor: 600000,
+      keepUnusedDataFor: 300000,
     }),
     addNewQuestion: builder.mutation<
       AddNewQuestionResponse,
@@ -120,21 +118,19 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
       providesTags: (result, error, arg) => [
         { type: "Question", id: arg.questionId },
       ],
+      keepUnusedDataFor: 30000,
     }),
     updateQuestion: builder.mutation<
       UpdateQuestionResponse,
       UpdateQuestionRequest
     >({
-      query: ({ questionId, title, thumbnail_link }) => ({
+      query: ({ questionId, ...body }) => ({
         url: `questions/${questionId}`,
         method: "PATCH",
-        body: {
-          title,
-          thumbnail_link,
-        },
+        body,
       }),
       invalidatesTags: (result, error, arg) => [
-        { type: "Question", id: "LIST" },
+        { type: "Question", id: arg.questionId },
       ],
     }),
   }),
