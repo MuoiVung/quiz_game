@@ -8,6 +8,7 @@ import {
   FormControl,
   IconButton,
   InputAdornment,
+  InputLabel,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -21,22 +22,19 @@ import {
   GridRowsProp,
 } from "@mui/x-data-grid";
 import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import { debounce } from "lodash";
 
 import {
   useDeleteQuestionMutation,
   useGetAllQuestionsQuery,
-  useGetQuestionQuery,
 } from "../../api/QuestionsAPI";
 import COLORS from "../../constants/colors";
-import QuestionModal from "./QuestionModal";
-import {
-  AddQuestionFormType,
-  QuestionModalType,
-  QuestionRowType,
-} from "./types";
 import EditQuestionModal from "./EditQuestionModal";
+import QuestionModal from "./QuestionModal";
+import { QuestionRowType } from "./types";
+import { OrderType, SortFieldType } from "../../api/QuestionsAPI/types";
 
 const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   "& .MuiDataGrid-columnHeaderTitle": {
@@ -46,16 +44,6 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     fontWeight: "bold",
   },
 }));
-
-const defaultAddQuestion: AddQuestionFormType = {
-  title: "",
-  thumbnailLink: "",
-  answer1: "",
-  answer2: "",
-  answer3: "",
-  answer4: "",
-  answerCorrect: 1,
-};
 
 const ManagementScreen = () => {
   const [type, setType] = useState("question");
@@ -68,6 +56,9 @@ const ManagementScreen = () => {
     open: false,
     questionId: 0,
   });
+  const [searchKeyWord, setSearchKeyWord] = useState("");
+  const [listOrder, setListOrder] = useState<OrderType>("ASC");
+  const [sortField, setSortField] = useState<SortFieldType>("id");
 
   const {
     data: questionsData,
@@ -77,6 +68,9 @@ const ManagementScreen = () => {
   } = useGetAllQuestionsQuery({
     page: paginationModel.page + 1,
     size: paginationModel.pageSize,
+    keyWord: searchKeyWord,
+    order: listOrder,
+    sortField,
   });
 
   const [deleteQuestion] = useDeleteQuestionMutation();
@@ -234,6 +228,18 @@ const ManagementScreen = () => {
     setEditQuestionModalState((prevState) => ({ ...prevState, open: false }));
   };
 
+  const handleSearch = debounce((event: ChangeEvent<HTMLInputElement>) => {
+    setSearchKeyWord(event.target.value);
+  }, 500);
+
+  const handleSelectOrder = (event: SelectChangeEvent<OrderType>) => {
+    setListOrder(event.target.value as OrderType);
+  };
+
+  const handleSort = (event: SelectChangeEvent<SortFieldType>) => {
+    setSortField(event.target.value as SortFieldType);
+  };
+
   return (
     <Box sx={{ p: 2 }}>
       <Box
@@ -260,6 +266,7 @@ const ManagementScreen = () => {
           sx={{
             minWidth: 300,
           }}
+          onChange={handleSearch}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -269,6 +276,28 @@ const ManagementScreen = () => {
           }}
         />
         {/* Search */}
+        {/* Start: Order */}
+        <FormControl
+          sx={{ m: 1, minWidth: 120, backgroundColor: COLORS.WHITE }}
+        >
+          <Select value={listOrder} onChange={handleSelectOrder}>
+            <MenuItem value="ASC">ASC</MenuItem>
+            <MenuItem value="DESC">DESC</MenuItem>
+          </Select>
+        </FormControl>
+        {/* End: Order */}
+        {/* Start: Sort */}
+        <FormControl
+          sx={{ m: 1, minWidth: 120, backgroundColor: COLORS.WHITE }}
+        >
+          <Select value={sortField} onChange={handleSort}>
+            <MenuItem value="id">ID</MenuItem>
+            <MenuItem value="title">Title</MenuItem>
+            <MenuItem value="createdAt">Created At</MenuItem>
+            <MenuItem value="updatedAt">Updated At</MenuItem>
+          </Select>
+        </FormControl>
+        {/* End: Sort */}
         {/* Start: Search - Add new Question/User */}
         <IconButton size="large" onClick={handleOpenAddQuestionModal}>
           <AddCircleIcon sx={{ fontSize: 48, color: COLORS.YELLOW }} />

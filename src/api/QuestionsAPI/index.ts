@@ -90,7 +90,7 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
               { type: "Question", id: "LIST" },
             ]
           : [{ type: "Question", id: "LIST" }],
-      keepUnusedDataFor: 600000,
+      keepUnusedDataFor: 300000,
     }),
     addNewQuestion: builder.mutation<
       AddNewQuestionResponse,
@@ -120,6 +120,7 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
       providesTags: (result, error, arg) => [
         { type: "Question", id: arg.questionId },
       ],
+      keepUnusedDataFor: 30000,
     }),
     updateQuestion: builder.mutation<
       UpdateQuestionResponse,
@@ -134,7 +135,7 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
         },
       }),
       invalidatesTags: (result, error, arg) => [
-        { type: "Question", id: "LIST" },
+        { type: "Question", id: arg.questionId },
       ],
     }),
   }),

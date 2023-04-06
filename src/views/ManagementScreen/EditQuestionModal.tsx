@@ -12,31 +12,29 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import * as yup from "yup";
-import { AddQuestionFormType, EditQuestionModalProps } from "./types";
+import {
+  AddQuestionFormType,
+  CORRECT_ANSWER,
+  EditQuestionModalProps,
+} from "./types";
 
 import { LoadingButton } from "@mui/lab";
 import { useEffect, useState } from "react";
+import { useUpdateAnswerMutation } from "../../api/AnswersAPI";
 import {
-  useAddNewAnswerMutation,
-  useUpdateAnswerMutation,
-} from "../../api/AnswersAPI";
-import {
-  useAddNewQuestionMutation,
   useGetQuestionQuery,
   useUpdateQuestionMutation,
 } from "../../api/QuestionsAPI";
 import CustomModal from "../../components/CustomModal";
-import LoadingScreen from "../../components/LoadingScreen";
 import COLORS from "../../constants/colors";
-import { UpdateAnswerRequest } from "../../api/AnswersAPI/types";
 
 const defaultAddQuestion: AddQuestionFormType = {
-  title: "2",
-  thumbnailLink: "",
-  answer1: "",
-  answer2: "",
-  answer3: "",
-  answer4: "",
+  title: " ",
+  thumbnailLink: " ",
+  answer1: " ",
+  answer2: " ",
+  answer3: " ",
+  answer4: " ",
   answerCorrect: 1,
 };
 
@@ -55,19 +53,13 @@ const EditQuestionModal = ({
   onCloseModal,
   questionId,
 }: EditQuestionModalProps) => {
-  //   const [questionDefaultValues, setQuestionDefaultValues] =
-  //     useState<AddQuestionFormType | null>(null);
-
-  const {
-    data: questionData,
-    isLoading,
-    isFetching,
-  } = useGetQuestionQuery({ questionId });
+  const { data: questionData } = useGetQuestionQuery({ questionId });
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     control,
     formState: { errors, isValid },
   } = useForm<AddQuestionFormType>({
@@ -75,23 +67,31 @@ const EditQuestionModal = ({
     defaultValues: defaultAddQuestion,
   });
 
+  const [defaultEditQuestionState, setDefaultEditQuestionState] =
+    useState(defaultAddQuestion);
+
   useEffect(() => {
     if (questionData) {
       const { data } = questionData;
+
+      const sortedAnswer = [...data.answers].sort(
+        (ans1, ans2) => ans1.id - ans2.id
+      );
+
       const defaultValues = {
         title: data.title,
         thumbnailLink: data.thumbnail_link,
-        answer1: data.answers[0]?.content || "",
-        answer2: data.answers[1]?.content || "",
-        answer3: data.answers[2]?.content || "",
-        answer4: data.answers[3]?.content || "",
+        answer1: sortedAnswer[0]?.content || "",
+        answer2: sortedAnswer[1]?.content || "",
+        answer3: sortedAnswer[2]?.content || "",
+        answer4: sortedAnswer[3]?.content || "",
         answerCorrect:
-          data.answers.findIndex((answer) => answer.is_correct) + 1,
+          sortedAnswer.findIndex((answer) => answer.is_correct) + 1,
       };
-
+      setDefaultEditQuestionState(defaultValues);
       reset(defaultValues);
     }
-  }, [questionData, reset]);
+  }, [questionData, reset, setValue]);
 
   const [updateQuestion, { isLoading: isUpdateQuestionLoading }] =
     useUpdateQuestionMutation();
@@ -100,43 +100,95 @@ const EditQuestionModal = ({
     useUpdateAnswerMutation();
 
   const handleEditQuestion = async (formData: AddQuestionFormType) => {
+    let answersData = questionData?.data.answers;
+
+    const answerCorrect = +formData.answerCorrect;
+
     try {
-      const {
-        data: { answers: answersData },
-      } = await updateQuestion({
-        title: formData.title,
-        thumbnail_link: formData.thumbnailLink || "",
-        questionId,
-      }).unwrap();
+      if (
+        formData.title !== defaultEditQuestionState.title ||
+        formData.thumbnailLink !== defaultEditQuestionState.thumbnailLink ||
+        !answersData
+      ) {
+        const {
+          data: { answers: answersResponse },
+        } = await updateQuestion({
+          title: formData.title,
+          thumbnail_link: formData.thumbnailLink || "",
+          questionId,
+        }).unwrap();
 
-      const answers = [
-        {
-          content: formData.answer1,
-          is_correct: 1 === +formData.answerCorrect,
-          answerId: answersData[0].id,
-        },
-        {
-          content: formData.answer2,
-          is_correct: 2 === +formData.answerCorrect,
-          answerId: answersData[1].id,
-        },
-        {
-          content: formData.answer3,
-          is_correct: 3 === +formData.answerCorrect,
-          answerId: answersData[2].id,
-        },
-        {
-          content: formData.answer4,
-          is_correct: 4 === +formData.answerCorrect,
-          answerId: answersData[3].id,
-        },
-      ];
+        answersData = [...answersResponse];
+      }
 
-      const promises = answers.map((answer) =>
-        updateAnswer({ ...answer, questionId }).unwrap()
+      const [answer1, answer2, answer3, answer4] = [...answersData].sort(
+        (ans1, ans2) => ans1.id - ans2.id
       );
 
-      await Promise.all(promises);
+      const updateAnswerPromises = [];
+
+      if (
+        formData.answer1 !== answer1.content ||
+        (!answer1.is_correct && answerCorrect === CORRECT_ANSWER.ANSWER_1) ||
+        (answer1.is_correct && answerCorrect !== CORRECT_ANSWER.ANSWER_1)
+      ) {
+        updateAnswerPromises.push(
+          updateAnswer({
+            content: formData.answer1,
+            is_correct: CORRECT_ANSWER.ANSWER_1 === answerCorrect,
+            answerId: answer1.id,
+            questionId,
+          }).unwrap()
+        );
+      }
+
+      if (
+        formData.answer2 !== answer2.content ||
+        (!answer2.is_correct && answerCorrect === CORRECT_ANSWER.ANSWER_2) ||
+        (answer2.is_correct && answerCorrect !== CORRECT_ANSWER.ANSWER_2)
+      ) {
+        updateAnswerPromises.push(
+          updateAnswer({
+            content: formData.answer2,
+            is_correct: CORRECT_ANSWER.ANSWER_2 === answerCorrect,
+            answerId: answer2.id,
+            questionId,
+          }).unwrap()
+        );
+      }
+
+      if (
+        formData.answer3 !== answer3.content ||
+        (!answer3.is_correct && answerCorrect === CORRECT_ANSWER.ANSWER_3) ||
+        (answer3.is_correct && answerCorrect !== CORRECT_ANSWER.ANSWER_3)
+      ) {
+        updateAnswerPromises.push(
+          updateAnswer({
+            content: formData.answer3,
+            is_correct: CORRECT_ANSWER.ANSWER_3 === answerCorrect,
+            answerId: answer3.id,
+            questionId,
+          }).unwrap()
+        );
+      }
+
+      if (
+        formData.answer4 !== answer4.content ||
+        (!answer4.is_correct && answerCorrect === CORRECT_ANSWER.ANSWER_4) ||
+        (answer4.is_correct && answerCorrect !== CORRECT_ANSWER.ANSWER_4)
+      ) {
+        updateAnswerPromises.push(
+          updateAnswer({
+            content: formData.answer4,
+            is_correct: CORRECT_ANSWER.ANSWER_4 === answerCorrect,
+            answerId: answer4.id,
+            questionId,
+          }).unwrap()
+        );
+      }
+
+      await Promise.all(updateAnswerPromises);
+
       toast.success("Edit question successuflly!");
       reset();
       onCloseModal();
@@ -151,10 +203,6 @@ const EditQuestionModal = ({
     reset();
     onCloseModal();
   };
-
-  if (isLoading || isFetching) {
-    return <LoadingScreen />;
-  }
 
   return (
     <CustomModal onClose={handleCloseModal} open={isOpen}>

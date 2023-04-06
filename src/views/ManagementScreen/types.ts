@@ -30,3 +30,10 @@ export type EditQuestionModalProps = {
 };
 
 export type QuestionModalType = "edit" | "add";
+
+export enum CORRECT_ANSWER {
+  ANSWER_1 = 1,
+  ANSWER_2,
+  ANSWER_3,
+  ANSWER_4,
+}
