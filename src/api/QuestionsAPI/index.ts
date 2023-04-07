@@ -17,6 +17,7 @@ import {
   TransformSubmitQuestionsResponse,
   UpdateQuestionRequest,
   UpdateQuestionResponse,
+  UploadThumbnailResponse,
 } from "./types";
 
 export const questionsApiSlice = apiSlice.injectEndpoints({
@@ -133,6 +134,13 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
         { type: "Question", id: arg.questionId },
       ],
     }),
+    uploadThumbnail: builder.mutation<UploadThumbnailResponse, FormData>({
+      query: (formData) => ({
+        url: "questions/upload-thumbnail",
+        method: "POST",
+        body: formData,
+      }),
+    }),
   }),
 });
 
@@ -144,4 +152,5 @@ export const {
   useAddNewQuestionMutation,
   useDeleteQuestionMutation,
   useUpdateQuestionMutation,
+  useUploadThumbnailMutation,
 } = questionsApiSlice;

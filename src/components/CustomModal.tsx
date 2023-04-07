@@ -27,7 +27,9 @@ const CustomModal = ({ open, onClose, children }: CustomModalProps) => {
             <Close color="primary" />
           </IconButton>
         </Box>
-        <Box p={4}>{children}</Box>
+        <Box py={2} px={4}>
+          {children}
+        </Box>
       </Box>
     </Modal>
   );

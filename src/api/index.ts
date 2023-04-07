@@ -31,7 +31,7 @@ const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  const authState = store.getState().auth;
+  const auth = store.getState().auth;
   // wait until the mutex is available without locking it
   await mutex.waitForUnlock();
 
@@ -47,7 +47,7 @@ const baseQueryWithReauth: BaseQueryFn<
           {
             url: "/authentication/refresh-token",
             method: "POST",
-            body: { refresh_token: authState.refreshToken },
+            body: { refresh_token: auth.refreshToken },
           },
           api,
           extraOptions
@@ -59,9 +59,12 @@ const baseQueryWithReauth: BaseQueryFn<
           // store the new token
           api.dispatch(
             setCredentials({
-              ...authState,
-              accessToken: refreshResultData?.data?.newTokens?.access_token,
-              refreshToken: refreshResultData?.data?.newTokens?.refresh_token,
+              isRemember: true,
+              authState: {
+                ...auth,
+                accessToken: refreshResultData.data.newTokens.access_token,
+                refreshToken: refreshResultData.data.newTokens.refresh_token,
+              },
             })
           );
           // retry the initial query

@@ -10,8 +10,8 @@ import {
   selectCurrentToken,
   selectCurrentUser,
 } from "../store/features/authSlice";
-import { useAppDispatch, useTypedSelector } from "../store/store";
-import { decryptData } from "../utils/lsCryptoJS.util";
+import store, { useAppDispatch, useTypedSelector } from "../store/store";
+import { decryptData, sessionDecryptData } from "../utils/lsCryptoJS.util";
 import AdminScreen from "../views/AdminScreen";
 import ForgotPasswordScreen from "../views/ForgotPasswordScreen";
 import InGameScreen from "../views/InGameScreen";
@@ -29,7 +29,8 @@ const MainRoutes = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const auth: AuthStateType | null = decryptData("auth");
+    const auth: AuthStateType | null =
+      decryptData("auth") || sessionDecryptData("auth");
 
     if (!auth) {
       setIsLoading(true);

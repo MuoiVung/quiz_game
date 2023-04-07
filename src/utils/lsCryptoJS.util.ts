@@ -24,4 +24,26 @@ const decryptData = (name: string) => {
   return JSON.parse(decrypted);
 };
 
-export { encryptData, decryptData };
+const sessionEncryptData = (name: string, data: any) => {
+  const encrypted = CryptoJS.AES.encrypt(
+    JSON.stringify(data),
+    SECRET_KEY
+  ).toString();
+  sessionStorage.setItem(name, encrypted);
+};
+
+const sessionDecryptData = (name: string) => {
+  const encrypted = sessionStorage.getItem(name);
+
+  if (!encrypted) {
+    return null;
+  }
+
+  const decrypted = CryptoJS.AES.decrypt(encrypted, SECRET_KEY).toString(
+    CryptoJS.enc.Utf8
+  );
+
+  return JSON.parse(decrypted);
+};
+
+export { encryptData, decryptData, sessionEncryptData, sessionDecryptData };

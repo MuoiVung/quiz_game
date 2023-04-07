@@ -168,3 +168,10 @@ export interface UpdateQuestionResponse {
   message: string;
   data: QuestionData;
 }
+
+// UPLOAD THUMBNAIL
+export interface UploadThumbnailResponse {
+  statusCode: number;
+  message: string;
+  data: string;
+}
