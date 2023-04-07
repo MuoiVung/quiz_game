@@ -1,24 +1,35 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
+  Avatar,
   Box,
   Button,
   FormControlLabel,
   FormLabel,
+  Grid,
   Radio,
   RadioGroup,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
-import { toast } from "react-toastify";
 import * as yup from "yup";
 import { AddQuestionFormType, BasicModalProps } from "./types";
 
 import { LoadingButton } from "@mui/lab";
+import { ChangeEvent, useRef, useState } from "react";
+import { toast } from "react-toastify";
 import { useAddNewAnswerMutation } from "../../api/AnswersAPI";
-import { useAddNewQuestionMutation } from "../../api/QuestionsAPI";
+import {
+  useAddNewQuestionMutation,
+  useUploadThumbnailMutation,
+} from "../../api/QuestionsAPI";
 import CustomModal from "../../components/CustomModal";
 import COLORS from "../../constants/colors";
+
+const defaultUrlModal = {
+  url: "",
+};
 
 const defaultAddQuestion: AddQuestionFormType = {
   title: "",
@@ -40,11 +51,16 @@ const questionValidateSchema = yup
   })
   .required();
 
+const urlModalSchema = yup.object({
+  url: yup.string().url("URL is invalid").required("Url is required"),
+});
+
 const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     control,
     formState: { errors, isValid },
   } = useForm<AddQuestionFormType>({
@@ -52,11 +68,28 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
     defaultValues: defaultAddQuestion,
   });
 
+  const {
+    register: urlModalRegister,
+    handleSubmit: handleSubmitUrlModal,
+    reset: resetUrlModal,
+    formState: { errors: urlModalError },
+  } = useForm({
+    defaultValues: defaultUrlModal,
+    resolver: yupResolver(urlModalSchema),
+  });
+
   const [addNewQuestion, { isLoading: isAddNewQuestionLoading }] =
     useAddNewQuestionMutation();
 
   const [addNewAnswers, { isLoading: isAddNewAnswerLoading }] =
     useAddNewAnswerMutation();
+
+  const [uploadThumbnail] = useUploadThumbnailMutation();
+
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
+
+  const [isUrlModalOpen, setIsUrlModalOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddQuestion = async (data: AddQuestionFormType) => {
     try {
@@ -66,18 +99,15 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
         title: data.title,
         thumbnail_link: data.thumbnailLink || "",
       }).unwrap();
-
       const answers = [
         { content: data.answer1, is_correct: 1 === +data.answerCorrect },
         { content: data.answer2, is_correct: 2 === +data.answerCorrect },
         { content: data.answer3, is_correct: 3 === +data.answerCorrect },
         { content: data.answer4, is_correct: 4 === +data.answerCorrect },
       ];
-
       const promises = answers.map((answer) =>
         addNewAnswers({ ...answer, questionId })
       );
-
       await Promise.all(promises);
       toast.success("Add new question successuflly!");
       reset();
@@ -94,6 +124,56 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
     onCloseModal();
   };
 
+  const handleCloseUrlModal = () => {
+    setIsUrlModalOpen(false);
+  };
+
+  const handleOpenUrlModal = () => {
+    setIsUrlModalOpen(true);
+  };
+
+  const handleSetNewThumbnailUrl = ({ url }: { url: string }) => {
+    setValue("thumbnailLink", url);
+    setThumbnailUrl(url);
+    resetUrlModal();
+    setIsUrlModalOpen(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleUploadImageFile = async (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const { files } = event.target;
+
+    if (!files || !files[0]) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("thumbnail", files[0]);
+
+    try {
+      const response = await toast.promise(
+        () => uploadThumbnail(formData).unwrap(),
+        {
+          pending: "Uploading...",
+          success: "Uploaded thumbnail successfully",
+          error: "Failed to upload thumbnail",
+        }
+      );
+
+      setValue("thumbnailLink", response.data);
+      setThumbnailUrl(response.data);
+    } catch (error) {
+      console.error("Faild to upload thumbnail");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
   return (
     <CustomModal onClose={handleCloseModal} open={isOpen}>
       <Typography
@@ -101,86 +181,83 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
         fontFamily="poppins"
         sx={{
           textAlign: "center",
-          mb: "12px",
+          mb: "24px",
         }}
       >
         Add Question
       </Typography>
       {/* START: ADD QUESTION FORM */}
       <Box component="form" onSubmit={handleSubmit(handleAddQuestion)}>
-        <TextField
-          {...register("title")}
-          required
-          error={errors.title ? true : false}
-          helperText={errors.title?.message}
-          name="title"
-          label="Title"
-          autoFocus
-          fullWidth
-          margin="normal"
-          autoComplete="true"
-        />
-        <TextField
-          {...register("thumbnailLink")}
-          name="thumbnailLink"
-          label="Thumbnail Link"
-          autoFocus
-          fullWidth
-          margin="normal"
-          autoComplete="true"
-        />
-        <TextField
-          {...register("answer1")}
-          required
-          error={errors.answer1 ? true : false}
-          helperText={errors.answer1?.message}
-          name="answer1"
-          label="Answer 1"
-          autoFocus
-          fullWidth
-          margin="normal"
-          autoComplete="true"
-        />
-        <TextField
-          {...register("answer2")}
-          required
-          error={errors.answer2 ? true : false}
-          helperText={errors.answer2?.message}
-          name="answer2"
-          label="Answer 2"
-          autoFocus
-          fullWidth
-          margin="normal"
-          autoComplete="true"
-        />
-        <TextField
-          {...register("answer3")}
-          required
-          error={errors.answer3 ? true : false}
-          helperText={errors.answer3?.message}
-          name="answer3"
-          label="Answer 3"
-          autoFocus
-          fullWidth
-          margin="normal"
-          autoComplete="true"
-        />
-        <TextField
-          {...register("answer4")}
-          required
-          error={errors.answer4 ? true : false}
-          helperText={errors.answer4?.message}
-          name="answer4"
-          label="Answer 4"
-          autoFocus
-          fullWidth
-          margin="normal"
-          autoComplete="true"
-          sx={{
-            mb: "24px",
-          }}
-        />
-
+        <Grid
+          container
+          sx={{ maxHeight: "500px", overflowY: "auto" }}
+          spacing={2}
+        >
+          <Grid item xs={12}>
+            <TextField
+              {...register("title")}
+              required
+              error={errors.title ? true : false}
+              helperText={errors.title?.message}
+              name="title"
+              label="Title"
+              autoFocus
+              fullWidth
+              autoComplete="true"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              {...register("answer1")}
+              required
+              error={errors.answer1 ? true : false}
+              helperText={errors.answer1?.message}
+              name="answer1"
+              label="Answer 1"
+              fullWidth
+              autoComplete="true"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              {...register("answer2")}
+              required
+              error={errors.answer2 ? true : false}
+              helperText={errors.answer2?.message}
+              name="answer2"
+              label="Answer 2"
+              fullWidth
+              autoComplete="true"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              {...register("answer3")}
+              required
+              error={errors.answer3 ? true : false}
+              helperText={errors.answer3?.message}
+              name="answer3"
+              label="Answer 3"
+              fullWidth
+              autoComplete="true"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              {...register("answer4")}
+              required
+              error={errors.answer4 ? true : false}
+              helperText={errors.answer4?.message}
+              name="answer4"
+              label="Answer 4"
+              fullWidth
+              autoComplete="true"
+              sx={{
+                mb: "24px",
+              }}
+            />
+          </Grid>
+        </Grid>
         <FormLabel
           sx={{
             color: COLORS.BLACK,
@@ -217,6 +294,35 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
             </RadioGroup>
           )}
         />
+
+        <Typography sx={{ mt: "20px", mb: "16px" }}>Thumbnail</Typography>
+
+        <Box display="flex" justifyContent="center">
+          <Avatar
+            alt="thumbnail"
+            sx={{
+              width: "50px",
+              height: "50px",
+            }}
+            src={thumbnailUrl}
+          />
+        </Box>
+
+        <Stack spacing="2px" justifyContent="center" mt={2}>
+          <Button component="label">
+            Upload image from your computer
+            <input
+              hidden
+              accept="image/*"
+              multiple
+              type="file"
+              onChange={handleUploadImageFile}
+              ref={fileInputRef}
+            />
+          </Button>
+          <Button onClick={handleOpenUrlModal}>Add image URL</Button>
+        </Stack>
+
         {/* Buttons */}
         <Box display="flex" justifyContent="flex-end" my="16px">
           <LoadingButton
@@ -238,7 +344,46 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
           </Button>
         </Box>
       </Box>
-      {/* END: ADD QUESTION FORM */}
+      <CustomModal open={isUrlModalOpen} onClose={handleCloseUrlModal}>
+        <Typography variant="h5" fontFamily="Poppins">
+          Add image URL
+        </Typography>
+        <Box
+          component="form"
+          sx={{ minWidth: "400px" }}
+          onSubmit={handleSubmitUrlModal(handleSetNewThumbnailUrl)}
+        >
+          <TextField
+            {...urlModalRegister("url")}
+            name="url"
+            label="Thumbnail Link"
+            autoFocus
+            fullWidth
+            margin="normal"
+            autoComplete="true"
+            required
+            error={urlModalError.url ? true : false}
+            helperText={urlModalError.url?.message}
+          />
+          <Box display="flex" justifyContent="flex-end" my="16px">
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{ color: COLORS.WHITE, mr: "12px" }}
+            >
+              Save
+            </Button>
+            <Button
+              color="error"
+              variant="contained"
+              onClick={handleCloseUrlModal}
+              sx={{ color: COLORS.WHITE }}
+            >
+              Cancel
+            </Button>
+          </Box>
+        </Box>
+      </CustomModal>
     </CustomModal>
   );
 };

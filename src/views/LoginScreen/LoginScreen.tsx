@@ -23,6 +23,7 @@ import { LoginFormDataType } from "./types";
 const defaultLoginValues: LoginFormDataType = {
   email: "",
   password: "",
+  isRemember: false,
 };
 
 const validateSchema = yup
@@ -57,12 +58,16 @@ const LoginScreen = () => {
   const handleLogin = async (data: LoginFormDataType) => {
     try {
       const result = await login(data).unwrap();
-      dispatch(setCredentials(result));
+      dispatch(
+        setCredentials({
+          authState: result,
+          isRemember: data.isRemember,
+        })
+      );
       reset();
       navigate("/", { replace: true, state: {} });
     } catch (error) {
       let errorMessage = "Invalid email or password. Please try again.";
-
       toast.error(errorMessage, {
         position: "top-center",
       });
@@ -149,7 +154,13 @@ const LoginScreen = () => {
             autoComplete="true"
           />
           <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
+            control={
+              <Checkbox
+                {...register("isRemember")}
+                // value="true"
+                color="primary"
+              />
+            }
             label="Remember me"
           />
           <LoadingButton

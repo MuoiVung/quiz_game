@@ -52,6 +52,13 @@ export interface GetUserResponse {
   data: UserData;
 }
 
+// GET USER PROFILE
+export interface GetUserProfileResponse {
+  statusCode: number;
+  message: string;
+  data: UserData;
+}
+
 // CREATE NEW USER
 export interface CreateUserRequest {
   email: string;
@@ -88,4 +95,26 @@ export interface UpdateUserResponse {
   statusCode: number;
   message: string;
   data: UserData;
+}
+
+// UPLOAD AVATAR
+export interface UploadAvatarResponse {
+  message: string;
+  data: string;
+  statusCode: number;
+}
+
+export interface UploadAvatarRequest {
+  userId: number;
+  formData: FormData;
+}
+
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  statusCode: number;
+  message: string;
 }

@@ -14,6 +14,7 @@ import IconSvg from "../components/IconSvg";
 import COLORS from "../constants/colors";
 import { logout, selectCurrentUser } from "../store/features/authSlice";
 import { useTypedSelector } from "../store/store";
+import { useGetUserProfleQuery } from "../api/UsersAPI";
 
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -21,13 +22,18 @@ const Navbar = () => {
   const user = useTypedSelector(selectCurrentUser);
   const navigate = useNavigate();
 
+  const { data: userProfileData } = useGetUserProfleQuery();
+
   const handleMenuOpen = (event: any) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleNavigateProfile = () => {
     setAnchorEl(null);
-    navigate("/profile", { replace: true });
+    navigate("/profile", {
+      replace: true,
+      state: { userId: user?.id || (userProfileData?.id as number) },
+    });
   };
 
   const handleMenuClose = () => {
@@ -60,7 +66,7 @@ const Navbar = () => {
 
         <Box>
           <IconButton onClick={handleMenuOpen} color="inherit">
-            <Avatar alt={user?.name} src={user?.avatarLink} />
+            <Avatar alt={user?.name} src={userProfileData?.avatar_link} />
           </IconButton>
           <Menu
             anchorEl={anchorEl}

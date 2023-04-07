@@ -11,6 +11,7 @@ const COLORS = {
   BLACK: "#333333",
   WHITE: "#ffffff",
   GRAY: "#d1d1d1",
+  GRAY_700: "#A8A8A8",
   GRAY_100: "#fafafa",
   PURPlE: "#461A42",
   BLUE: "#2F6DAE",
