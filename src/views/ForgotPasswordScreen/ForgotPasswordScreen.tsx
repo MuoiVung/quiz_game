@@ -1,14 +1,15 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { LoadingButton } from "@mui/lab";
-import { Box, Grid, TextField, Typography } from "@mui/material";
+import { Box, Grid, TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
 import * as yup from "yup";
 import { useResetPasswordMutation } from "../../api/AuthAPI";
 import { ErrorResponseType } from "../../api/AuthAPI/types";
 
-import IconSvg from "../../components/IconSvg";
-import COLORS from "../../constants/colors";
+import AuthButtonContainer from "../../components/AuthButtonContainer/AuthButtonContainer";
+import AuthHeader from "../../components/AuthHeader/AuthHeader";
+import Brand from "../../components/Brand/Brand";
+import SubmitButton from "../../components/SubmitButton/SubmitButton";
+import { AuthContainer } from "../../styles/AuthScreen.styles";
 import { ForgotPasswordDataType } from "./types";
 
 const defaultForgotPasswordValue: ForgotPasswordDataType = {
@@ -47,58 +48,15 @@ const ForgotPasswordScreen = () => {
   };
 
   return (
-    <Grid component="main" container sx={{ height: "100vh" }}>
-      <Grid
-        item
-        xs={false}
-        sm={4}
-        md={7}
-        sx={{
-          backgroundColor: COLORS.GRAY_100,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <IconSvg name="hands_graduate" />
-      </Grid>
-      <Grid
-        item
-        xs={12}
-        sm={8}
-        md={5}
-        p={4}
-        sx={{ backgroundColor: COLORS.WHITE }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <IconSvg name="brand" />
-        </Box>
-        <Box
-          sx={{
-            textAlign: "center",
-            my: "40px",
-          }}
-        >
-          <Typography
-            sx={{
-              color: "rgba(0,0,0,0.6)",
-            }}
-          >
-            Welcome Back!
-          </Typography>
-          <Typography
-            sx={{
-              color: "rgba(0,0,0,0.6)",
-            }}
-          >
-            Please enter your email to reset password
-          </Typography>
-        </Box>
+    <AuthContainer container>
+      <Brand />
+
+      <Grid item xs={12} sm={8} md={5} p={4}>
+        <AuthHeader
+          title="Welcome Back!"
+          subTitle="Please enter your email to reset password"
+        />
+
         {/* FORM */}
         <Box component="form" onSubmit={handleSubmit(handleRegister)}>
           <TextField
@@ -113,32 +71,19 @@ const ForgotPasswordScreen = () => {
             margin="normal"
             autoComplete="true"
           />
-          <LoadingButton
-            loading={isLoading}
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2, color: COLORS.WHITE, py: "12px" }}
-          >
-            Send
-          </LoadingButton>
+
+          <SubmitButton loading={isLoading} content="Send" />
         </Box>
         {/* FORM */}
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Link to="/register" style={{ textDecoration: "none" }}>
-            <Typography color="primary" sx={{ textDecoration: "underline" }}>
-              Don't have an account? Sign Up
-            </Typography>
-          </Link>
 
-          <Link to="/login" style={{ textDecoration: "none" }}>
-            <Typography color="primary" sx={{ textDecoration: "underline" }}>
-              Already have an account? Login here!
-            </Typography>
-          </Link>
-        </Box>
+        <AuthButtonContainer
+          btnLeftUrl="/register"
+          btnLeftContent="Don't have an account? Sign Up"
+          btnRightUrl="/login"
+          btnRightContent="Already have an account? Login here!"
+        />
       </Grid>
-    </Grid>
+    </AuthContainer>
   );
 };
 

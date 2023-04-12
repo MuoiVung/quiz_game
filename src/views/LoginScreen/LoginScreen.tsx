@@ -1,26 +1,25 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { LoadingButton } from "@mui/lab";
 import {
   Box,
-  Button,
   Checkbox,
   FormControlLabel,
   Grid,
   TextField,
-  Typography,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as yup from "yup";
 
 import { useLoginMutation } from "../../api/AuthAPI";
-import IconSvg from "../../components/IconSvg";
-import COLORS from "../../constants/colors";
 import { setCredentials } from "../../store/features/authSlice";
 import { useAppDispatch } from "../../store/store";
+import { AuthContainer } from "../../styles/AuthScreen.styles";
+import AuthButtonContainer from "../../components/AuthButtonContainer";
+import AuthHeader from "../../components/AuthHeader/AuthHeader";
 import { LoginFormDataType } from "./types";
-import { updateNumber } from "../../store/features/numberSlice";
+import Brand from "../../components/Brand";
+import SubmitButton from "../../components/SubmitButton";
 
 const defaultLoginValues: LoginFormDataType = {
   email: "",
@@ -76,63 +75,16 @@ const LoginScreen = () => {
     }
   };
 
-  // const handleUpdateNumber = () => {
-  //   dispatch(updateNumber());
-  // };
-
   return (
-    <Grid component="main" container sx={{ height: "100vh" }}>
-      <Grid
-        item
-        xs={false}
-        sm={4}
-        md={7}
-        sx={{
-          backgroundColor: COLORS.GRAY_100,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <IconSvg name="hands_graduate" />
-      </Grid>
-      <Grid
-        item
-        xs={12}
-        sm={8}
-        md={5}
-        p={4}
-        sx={{ backgroundColor: COLORS.WHITE }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <IconSvg name="brand" />
-        </Box>
-        <Box
-          sx={{
-            textAlign: "center",
-            my: "40px",
-          }}
-        >
-          <Typography
-            sx={{
-              color: "rgba(0,0,0,0.6)",
-            }}
-          >
-            Welcome Back!
-          </Typography>
-          <Typography
-            sx={{
-              color: "rgba(0,0,0,0.6)",
-            }}
-          >
-            Please login to your account
-          </Typography>
-        </Box>
+    <AuthContainer>
+      <Brand />
+
+      <Grid item xs={12} sm={8} md={6} p={4}>
+        <AuthHeader
+          title="Welcome Back!"
+          subTitle="Please login to your account"
+        />
+
         {/* FORM */}
         <Box component="form" onSubmit={handleSubmit(handleLogin)}>
           <TextField
@@ -169,34 +121,17 @@ const LoginScreen = () => {
             }
             label="Remember me"
           />
-          <LoadingButton
-            loading={isLoading}
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2, color: COLORS.WHITE, py: "12px" }}
-          >
-            Sign in
-          </LoadingButton>
+          <SubmitButton loading={isLoading} content="Sign in" />
         </Box>
-        {/* FORM */}
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Link to="/forgot-password" style={{ textDecoration: "none" }}>
-            <Typography color="primary" sx={{ textDecoration: "underline" }}>
-              Forgot Password
-            </Typography>
-          </Link>
 
-          <Link to="/register" style={{ textDecoration: "none" }}>
-            <Typography color="primary" sx={{ textDecoration: "underline" }}>
-              Don't have an account? Sign Up
-            </Typography>
-          </Link>
-        </Box>
+        <AuthButtonContainer
+          btnLeftUrl="/forgot-password"
+          btnLeftContent="Forgot Password"
+          btnRightUrl="/register"
+          btnRightContent="Don't have an account? Sign Up"
+        />
       </Grid>
-      {/* Test */}
-      {/* <Button onClick={handleUpdateNumber}>Update number</Button> */}
-    </Grid>
+    </AuthContainer>
   );
 };
 

@@ -109,8 +109,8 @@ const RegisterForm = ({
         type="password"
         required
         {...register("retypePassword")}
-        error={errors.password ? true : false}
-        helperText={errors.password?.message}
+        error={errors.retypePassword ? true : false}
+        helperText={errors.retypePassword?.message}
         name="retypePassword"
         label="Re-type Password"
         fullWidth
