@@ -19,6 +19,8 @@ import { EditUserFormType, EditUserModalProps } from "./types";
 import { useGetUserQuery, useUpdateUserMutation } from "../../api/UsersAPI";
 import CustomModal from "../../components/CustomModal/CustomModal";
 import COLORS from "../../constants/colors";
+import FormModalButton from "../../components/FormModalButton/FormModalButton";
+import FormModal from "../../components/FormModal/FormModal";
 
 const userValidateSchema = yup
   .object({
@@ -87,7 +89,7 @@ const EditUserModal = ({
   };
 
   return (
-    <CustomModal onClose={handleCloseModal} open={isOpen}>
+    <FormModal onClose={handleCloseModal} open={isOpen}>
       <Typography
         variant="h4"
         fontFamily="poppins"
@@ -148,29 +150,13 @@ const EditUserModal = ({
           />
         </FormGroup>
         {/* Buttons */}
-        <Box display="flex" justifyContent="flex-end" my="16px">
-          <LoadingButton
-            loading={
-              isUpdateUserLoading || isGetUserFetching || isGetUserLoading
-            }
-            type="submit"
-            variant="contained"
-            sx={{ color: COLORS.WHITE, mr: "12px" }}
-          >
-            Save
-          </LoadingButton>
-          <Button
-            color="error"
-            variant="contained"
-            onClick={handleCloseModal}
-            sx={{ color: COLORS.WHITE }}
-          >
-            Cancel
-          </Button>
-        </Box>
+        <FormModalButton
+          loading={isUpdateUserLoading || isGetUserFetching || isGetUserLoading}
+          onCloseModal={handleCloseModal}
+        />
       </Box>
       {/* END: ADD QUESTION FORM */}
-    </CustomModal>
+    </FormModal>
   );
 };
 

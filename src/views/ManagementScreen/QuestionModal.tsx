@@ -9,21 +9,22 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useForm } from "react-hook-form";
-import * as yup from "yup";
-import { AddQuestionFormType, BasicModalProps } from "./types";
-
-import { LoadingButton } from "@mui/lab";
 import { ChangeEvent, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import * as yup from "yup";
+
 import { useAddNewAnswerMutation } from "../../api/AnswersAPI";
 import {
   useAddNewQuestionMutation,
   useUploadThumbnailMutation,
 } from "../../api/QuestionsAPI";
 import CheckboxList from "../../components/CheckboxList";
-import CustomModal from "../../components/CustomModal/CustomModal";
+import CustomModal from "../../components/CustomModal";
+import FormModal from "../../components/FormModal";
+import FormModalButton from "../../components/FormModalButton";
 import COLORS from "../../constants/colors";
+import { AddQuestionFormType, BasicModalProps } from "./types";
 
 const defaultUrlModal = {
   url: "",
@@ -64,7 +65,6 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
     handleSubmit,
     reset,
     setValue,
-    getValues,
     formState: { errors, isValid },
   } = useForm<AddQuestionFormType>({
     resolver: yupResolver(questionValidateSchema),
@@ -95,7 +95,6 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddQuestion = async (data: AddQuestionFormType) => {
-    console.log("data: ", data);
     try {
       const {
         data: { id: questionId },
@@ -179,7 +178,7 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
   };
 
   return (
-    <CustomModal onClose={handleCloseModal} open={isOpen}>
+    <FormModal onClose={handleCloseModal} open={isOpen}>
       <Typography
         variant="h4"
         fontFamily="poppins"
@@ -304,26 +303,10 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
           <Button onClick={handleOpenUrlModal}>Add image URL</Button>
         </Stack>
 
-        {/* Buttons */}
-        <Box display="flex" justifyContent="flex-end" my="16px">
-          <LoadingButton
-            loading={isAddNewQuestionLoading || isAddNewAnswerLoading}
-            type="submit"
-            variant="contained"
-            sx={{ color: COLORS.WHITE, mr: "12px" }}
-            disabled={!isValid}
-          >
-            Save
-          </LoadingButton>
-          <Button
-            color="error"
-            variant="contained"
-            onClick={handleCloseModal}
-            sx={{ color: COLORS.WHITE }}
-          >
-            Cancel
-          </Button>
-        </Box>
+        <FormModalButton
+          loading={isAddNewQuestionLoading || isAddNewAnswerLoading}
+          onCloseModal={handleCloseModal}
+        />
       </Box>
       <CustomModal open={isUrlModalOpen} onClose={handleCloseUrlModal}>
         <Typography variant="h5" fontFamily="Poppins">
@@ -346,26 +329,11 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
             error={urlModalError.url ? true : false}
             helperText={urlModalError.url?.message}
           />
-          <Box display="flex" justifyContent="flex-end" my="16px">
-            <Button
-              type="submit"
-              variant="contained"
-              sx={{ color: COLORS.WHITE, mr: "12px" }}
-            >
-              Save
-            </Button>
-            <Button
-              color="error"
-              variant="contained"
-              onClick={handleCloseUrlModal}
-              sx={{ color: COLORS.WHITE }}
-            >
-              Cancel
-            </Button>
-          </Box>
+
+          <FormModalButton loading={false} onCloseModal={handleCloseUrlModal} />
         </Box>
       </CustomModal>
-    </CustomModal>
+    </FormModal>
   );
 };
 

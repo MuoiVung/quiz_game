@@ -7,7 +7,7 @@ const CheckboxItem = ({
   defaultChecked = false,
 }: CheckboxItemType) => {
   return (
-    <Grid item xs={12} md={6} lg={3}>
+    <Grid item xs={6} md={6} lg={3}>
       <FormControlLabel
         {...extraProps}
         control={<Checkbox defaultChecked={defaultChecked} />}

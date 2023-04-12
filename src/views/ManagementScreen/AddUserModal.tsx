@@ -1,13 +1,12 @@
-import { Box, Button, Typography } from "@mui/material";
-import { LoadingButton } from "@mui/lab";
+import { Typography } from "@mui/material";
 import { toast } from "react-toastify";
 
-import { AddUserFormType, BasicModalProps } from "./types";
 import { ErrorResponseType } from "../../api/AuthAPI/types";
 import { useCreateUserMutation } from "../../api/UsersAPI";
-import CustomModal from "../../components/CustomModal/CustomModal";
+import FormModal from "../../components/FormModal/FormModal";
+import FormModalButton from "../../components/FormModalButton/FormModalButton";
 import RegisterForm from "../../components/RegisterForm/RegisterForm";
-import COLORS from "../../constants/colors";
+import { AddUserFormType, BasicModalProps } from "./types";
 
 const AddUserModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
   const [addUser, { isLoading: isAddUserLoading }] = useCreateUserMutation();
@@ -34,7 +33,7 @@ const AddUserModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
   };
 
   return (
-    <CustomModal onClose={handleCloseModal} open={isOpen}>
+    <FormModal onClose={handleCloseModal} open={isOpen}>
       <Typography
         variant="h4"
         fontFamily="poppins"
@@ -47,27 +46,12 @@ const AddUserModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
       </Typography>
 
       <RegisterForm onSubmitForm={handleAddUser} hasRoleField>
-        <Box display="flex" justifyContent="flex-end" my="16px">
-          <LoadingButton
-            loading={isAddUserLoading}
-            type="submit"
-            variant="contained"
-            sx={{ color: COLORS.WHITE, mr: "12px" }}
-          >
-            Save
-          </LoadingButton>
-
-          <Button
-            color="error"
-            variant="contained"
-            onClick={handleCloseModal}
-            sx={{ color: COLORS.WHITE }}
-          >
-            Cancel
-          </Button>
-        </Box>
+        <FormModalButton
+          loading={isAddUserLoading}
+          onCloseModal={handleCloseModal}
+        />
       </RegisterForm>
-    </CustomModal>
+    </FormModal>
   );
 };
 

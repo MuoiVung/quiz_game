@@ -26,25 +26,12 @@ import { QuestionAnswersType } from "../../api/QuestionsAPI/types";
 import CheckboxList from "../../components/CheckboxList/CheckboxList";
 import CustomModal from "../../components/CustomModal/CustomModal";
 import COLORS from "../../constants/colors";
+import FormModal from "../../components/FormModal";
+import FormModalButton from "../../components/FormModalButton/FormModalButton";
 
 const defaultUrlModal = {
   url: "",
 };
-
-// const defaultAddQuestion: EditQuestionFormType = {
-//   title: " ",
-//   thumbnailLink: " ",
-//   answer1: " ",
-//   answer2: " ",
-//   answer3: " ",
-//   answer4: " ",
-//   answerCorrect: {
-//     answer1: false,
-//     answer2: false,
-//     answer3: false,
-//     answer4: false,
-//   },
-// };
 
 const questionValidateSchema = yup
   .object({
@@ -300,7 +287,7 @@ const EditQuestionModal = ({
   };
 
   return (
-    <CustomModal onClose={handleCloseModal} open={isOpen}>
+    <FormModal onClose={handleCloseModal} open={isOpen}>
       <Typography
         variant="h4"
         fontFamily="poppins"
@@ -328,7 +315,6 @@ const EditQuestionModal = ({
               label="Title"
               autoFocus
               fullWidth
-              margin="normal"
               autoComplete="true"
             />
           </Grid>
@@ -342,7 +328,6 @@ const EditQuestionModal = ({
               label="Answer 1"
               autoFocus
               fullWidth
-              margin="normal"
               autoComplete="true"
             />
           </Grid>
@@ -356,7 +341,6 @@ const EditQuestionModal = ({
               label="Answer 2"
               autoFocus
               fullWidth
-              margin="normal"
               autoComplete="true"
             />
           </Grid>
@@ -370,7 +354,6 @@ const EditQuestionModal = ({
               label="Answer 3"
               autoFocus
               fullWidth
-              margin="normal"
               autoComplete="true"
             />
           </Grid>
@@ -384,7 +367,6 @@ const EditQuestionModal = ({
               label="Answer 4"
               autoFocus
               fullWidth
-              margin="normal"
               autoComplete="true"
               sx={{
                 mb: "24px",
@@ -433,35 +415,18 @@ const EditQuestionModal = ({
           <Button onClick={handleOpenUrlModal}>Add image URL</Button>
         </Stack>
 
-        {/* Buttons */}
-        <Box display="flex" justifyContent="flex-end" my="16px">
-          <LoadingButton
-            loading={isUpdateQuestionLoading || isUpdateAnswerLoading}
-            type="submit"
-            variant="contained"
-            sx={{ color: COLORS.WHITE, mr: "12px" }}
-            disabled={!isValid}
-          >
-            Save
-          </LoadingButton>
-          <Button
-            color="error"
-            variant="contained"
-            onClick={handleCloseModal}
-            sx={{ color: COLORS.WHITE }}
-          >
-            Cancel
-          </Button>
-        </Box>
+        <FormModalButton
+          loading={isUpdateQuestionLoading || isUpdateAnswerLoading}
+          onCloseModal={handleCloseModal}
+        />
       </Box>
       {/* END: ADD QUESTION FORM */}
-      <CustomModal open={isUrlModalOpen} onClose={handleCloseUrlModal}>
+      <FormModal open={isUrlModalOpen} onClose={handleCloseUrlModal}>
         <Typography variant="h5" fontFamily="Poppins">
           Add image URL
         </Typography>
         <Box
           component="form"
-          sx={{ minWidth: "400px" }}
           onSubmit={handleSubmitUrlModal(handleSetNewThumbnailUrl)}
         >
           <TextField
@@ -476,26 +441,10 @@ const EditQuestionModal = ({
             error={urlModalError.url ? true : false}
             helperText={urlModalError.url?.message}
           />
-          <Box display="flex" justifyContent="flex-end" my="16px">
-            <Button
-              type="submit"
-              variant="contained"
-              sx={{ color: COLORS.WHITE, mr: "12px" }}
-            >
-              Save
-            </Button>
-            <Button
-              color="error"
-              variant="contained"
-              onClick={handleCloseUrlModal}
-              sx={{ color: COLORS.WHITE }}
-            >
-              Cancel
-            </Button>
-          </Box>
+          <FormModalButton onCloseModal={handleCloseUrlModal} loading={false} />
         </Box>
-      </CustomModal>
-    </CustomModal>
+      </FormModal>
+    </FormModal>
   );
 };
 

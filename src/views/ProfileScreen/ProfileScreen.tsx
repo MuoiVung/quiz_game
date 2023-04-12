@@ -163,7 +163,7 @@ const ProfileScreen = () => {
       </Stack>
       {/* START: Information */}
       <Stack
-        direction="row"
+        direction={{ md: "row" }}
         justifyContent="center"
         alignItems="center"
         spacing={4}
@@ -261,11 +261,7 @@ const ProfileScreen = () => {
         <Typography variant="h4" textAlign="center" mb="16px">
           Change Password
         </Typography>
-        <Stack
-          component="form"
-          sx={{ minWidth: "500px" }}
-          onSubmit={handleSubmit(handleChangePassword)}
-        >
+        <Stack component="form" onSubmit={handleSubmit(handleChangePassword)}>
           <TextField
             required
             {...register("currentPassword")}

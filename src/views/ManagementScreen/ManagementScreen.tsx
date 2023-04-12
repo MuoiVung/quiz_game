@@ -2,8 +2,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
-  FormControl,
-  IconButton,
+  Button,
   InputAdornment,
   MenuItem,
   Select,
@@ -14,11 +13,11 @@ import { debounce } from "lodash";
 import { ChangeEvent, useCallback, useState } from "react";
 
 import { OrderType, QuestionSortFieldType } from "../../api/QuestionsAPI/types";
-import COLORS from "../../constants/colors";
-import QuestionDataTable from "./QuestionDataTable";
-import { MangementType } from "./types";
-import UserDataTable from "./UserDataTable";
 import { UserSortFiedType } from "../../api/UsersAPI/types";
+import QuestionDataTable from "./QuestionDataTable";
+import UserDataTable from "./UserDataTable";
+import { FunctionBar, FunctionItem } from "./styles";
+import { MangementType } from "./types";
 
 const ManagementScreen = () => {
   const [type, setType] = useState<MangementType>("question");
@@ -80,54 +79,42 @@ const ManagementScreen = () => {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Box
-        sx={{
-          backgroundColor: COLORS.WHITE,
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
+      <FunctionBar direction={{ md: "row" }} spacing={2}>
         {/* Start: Questions/Users */}
-        <FormControl
-          sx={{ m: 1, minWidth: 120, backgroundColor: COLORS.WHITE }}
-        >
+        <FunctionItem>
           <Select value={type} onChange={handleSelectType} displayEmpty>
             <MenuItem value="user">User</MenuItem>
             <MenuItem value="question">Question</MenuItem>
           </Select>
-        </FormControl>
+        </FunctionItem>
         {/* End: Questions/Users */}
 
         {/* Search */}
-        <TextField
-          label="Search"
-          sx={{
-            minWidth: 300,
-          }}
-          onChange={handleSearch}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-        />
+        <FunctionItem>
+          <TextField
+            label="Search"
+            onChange={handleSearch}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </FunctionItem>
         {/* Search */}
+
         {/* Start: Order */}
-        <FormControl
-          sx={{ m: 1, minWidth: 120, backgroundColor: COLORS.WHITE }}
-        >
+        <FunctionItem>
           <Select value={listOrder} onChange={handleSelectOrder}>
             <MenuItem value="ASC">ASC</MenuItem>
             <MenuItem value="DESC">DESC</MenuItem>
           </Select>
-        </FormControl>
+        </FunctionItem>
         {/* End: Order */}
         {/* Start: Sort */}
-        <FormControl
-          sx={{ m: 1, minWidth: 120, backgroundColor: COLORS.WHITE }}
-        >
+        <FunctionItem>
           {type === "question" && (
             <Select value={questionSortField} onChange={handleQuestionSort}>
               <MenuItem value="id">ID</MenuItem>
@@ -145,15 +132,23 @@ const ManagementScreen = () => {
               <MenuItem value="updated_at">Updated Day</MenuItem>
             </Select>
           )}
-        </FormControl>
+        </FunctionItem>
         {/* End: Sort */}
         {/* Start: Search - Add new Question/User */}
-        <IconButton size="large" onClick={handleOpenAddModal}>
+        {/* <IconButton size="large" onClick={handleOpenAddModal}>
           <AddCircleIcon sx={{ fontSize: 48, color: COLORS.YELLOW }} />
-        </IconButton>
+        </IconButton> */}
+
+        <Button
+          onClick={handleOpenAddModal}
+          startIcon={<AddCircleIcon />}
+          variant="contained"
+        >
+          {type === "user" ? "Add User" : "Add Question"}
+        </Button>
 
         {/* End: Search - Add new Question/User */}
-      </Box>
+      </FunctionBar>
       {/* Table */}
       <Box sx={{ height: 200, mt: "24px" }}>
         {type === "question" && (
