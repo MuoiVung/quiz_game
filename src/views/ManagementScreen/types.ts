@@ -54,6 +54,21 @@ export type QuestionRowType = {
   thumbnail: string;
 };
 
+export type EditQuestionFormType = {
+  title: string;
+  thumbnailLink?: string;
+  answer1: string;
+  answer2: string;
+  answer3: string;
+  answer4: string;
+  answerCorrect: {
+    answer1: boolean;
+    answer2: boolean;
+    answer3: boolean;
+    answer4: boolean;
+  };
+};
+
 export type AddQuestionFormType = {
   title: string;
   thumbnailLink?: string;
@@ -61,7 +76,12 @@ export type AddQuestionFormType = {
   answer2: string;
   answer3: string;
   answer4: string;
-  answerCorrect: number;
+  answerCorrect: {
+    answer1: boolean;
+    answer2: boolean;
+    answer3: boolean;
+    answer4: boolean;
+  };
 };
 
 export type BasicModalProps = {

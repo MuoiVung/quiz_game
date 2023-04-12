@@ -60,8 +60,6 @@ const EditUserModal = ({
 
   const handleEditUser = async (formData: EditUserFormType) => {
     try {
-      console.log(formData);
-
       const { roles: formDataRoles } = formData;
       const { roles: defaultRoles } = defaultValues;
       const areRolesSame = isEqual(formDataRoles, defaultRoles);

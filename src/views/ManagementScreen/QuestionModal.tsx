@@ -3,16 +3,13 @@ import {
   Avatar,
   Box,
   Button,
-  FormControlLabel,
   FormLabel,
   Grid,
-  Radio,
-  RadioGroup,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { AddQuestionFormType, BasicModalProps } from "./types";
 
@@ -24,6 +21,7 @@ import {
   useAddNewQuestionMutation,
   useUploadThumbnailMutation,
 } from "../../api/QuestionsAPI";
+import CheckboxList from "../../components/CheckboxList";
 import CustomModal from "../../components/CustomModal";
 import COLORS from "../../constants/colors";
 
@@ -38,7 +36,12 @@ const defaultAddQuestion: AddQuestionFormType = {
   answer2: "",
   answer3: "",
   answer4: "",
-  answerCorrect: 1,
+  answerCorrect: {
+    answer1: false,
+    answer2: false,
+    answer3: false,
+    answer4: false,
+  },
 };
 
 const questionValidateSchema = yup
@@ -61,7 +64,7 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
     handleSubmit,
     reset,
     setValue,
-    control,
+    getValues,
     formState: { errors, isValid },
   } = useForm<AddQuestionFormType>({
     resolver: yupResolver(questionValidateSchema),
@@ -92,6 +95,7 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddQuestion = async (data: AddQuestionFormType) => {
+    console.log("data: ", data);
     try {
       const {
         data: { id: questionId },
@@ -100,10 +104,10 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
         thumbnail_link: data.thumbnailLink || "",
       }).unwrap();
       const answers = [
-        { content: data.answer1, is_correct: 1 === +data.answerCorrect },
-        { content: data.answer2, is_correct: 2 === +data.answerCorrect },
-        { content: data.answer3, is_correct: 3 === +data.answerCorrect },
-        { content: data.answer4, is_correct: 4 === +data.answerCorrect },
+        { content: data.answer1, is_correct: data.answerCorrect.answer1 },
+        { content: data.answer2, is_correct: data.answerCorrect.answer2 },
+        { content: data.answer3, is_correct: data.answerCorrect.answer3 },
+        { content: data.answer4, is_correct: data.answerCorrect.answer4 },
       ];
       const promises = answers.map((answer) =>
         addNewAnswers({ ...answer, questionId })
@@ -265,34 +269,11 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
         >
           Correct Answer
         </FormLabel>
-        <Controller
-          control={control}
-          name="answerCorrect"
-          defaultValue={1}
-          render={({ field }) => (
-            <RadioGroup row value={field.value} onChange={field.onChange}>
-              <FormControlLabel
-                value={1}
-                control={<Radio />}
-                label="Answer 1"
-              />
-              <FormControlLabel
-                value={2}
-                control={<Radio />}
-                label="Answer 2"
-              />
-              <FormControlLabel
-                value={3}
-                control={<Radio />}
-                label="Answer 3"
-              />
-              <FormControlLabel
-                value={4}
-                control={<Radio />}
-                label="Answer 4"
-              />
-            </RadioGroup>
-          )}
+
+        {/* Answer Checkbox List */}
+        <CheckboxList
+          register={register}
+          defaultCorrectAnswers={defaultAddQuestion.answerCorrect}
         />
 
         <Typography sx={{ mt: "20px", mb: "16px" }}>Thumbnail</Typography>

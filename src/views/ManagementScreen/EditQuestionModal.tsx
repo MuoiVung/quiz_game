@@ -3,23 +3,16 @@ import {
   Avatar,
   Box,
   Button,
-  FormControlLabel,
   FormLabel,
   Grid,
-  Radio,
-  RadioGroup,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import * as yup from "yup";
-import {
-  AddQuestionFormType,
-  CORRECT_ANSWER,
-  EditQuestionModalProps,
-} from "./types";
+import { EditQuestionFormType, EditQuestionModalProps } from "./types";
 
 import { LoadingButton } from "@mui/lab";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
@@ -29,6 +22,8 @@ import {
   useUpdateQuestionMutation,
   useUploadThumbnailMutation,
 } from "../../api/QuestionsAPI";
+import { QuestionAnswersType } from "../../api/QuestionsAPI/types";
+import CheckboxList from "../../components/CheckboxList/CheckboxList";
 import CustomModal from "../../components/CustomModal";
 import COLORS from "../../constants/colors";
 
@@ -36,15 +31,20 @@ const defaultUrlModal = {
   url: "",
 };
 
-const defaultAddQuestion: AddQuestionFormType = {
-  title: " ",
-  thumbnailLink: " ",
-  answer1: " ",
-  answer2: " ",
-  answer3: " ",
-  answer4: " ",
-  answerCorrect: 1,
-};
+// const defaultAddQuestion: EditQuestionFormType = {
+//   title: " ",
+//   thumbnailLink: " ",
+//   answer1: " ",
+//   answer2: " ",
+//   answer3: " ",
+//   answer4: " ",
+//   answerCorrect: {
+//     answer1: false,
+//     answer2: false,
+//     answer3: false,
+//     answer4: false,
+//   },
+// };
 
 const questionValidateSchema = yup
   .object({
@@ -67,16 +67,53 @@ const EditQuestionModal = ({
 }: EditQuestionModalProps) => {
   const { data: questionData } = useGetQuestionQuery({ questionId });
 
+  let defaultEditQuestion: EditQuestionFormType = {
+    title: " ",
+    thumbnailLink: " ",
+    answer1: " ",
+    answer2: " ",
+    answer3: " ",
+    answer4: " ",
+    answerCorrect: {
+      answer1: false,
+      answer2: false,
+      answer3: false,
+      answer4: false,
+    },
+  };
+
+  let sortedAnswer: QuestionAnswersType[] = [];
+
+  if (questionData?.data.answers) {
+    sortedAnswer = [...questionData?.data.answers].sort(
+      (ans1, ans2) => ans1.id - ans2.id
+    );
+
+    defaultEditQuestion = {
+      title: questionData?.data.title,
+      thumbnailLink: questionData?.data.thumbnail_link,
+      answer1: sortedAnswer[0]?.content || "",
+      answer2: sortedAnswer[1]?.content || "",
+      answer3: sortedAnswer[2]?.content || "",
+      answer4: sortedAnswer[3]?.content || "",
+      answerCorrect: {
+        answer1: sortedAnswer[0]?.is_correct || false,
+        answer2: sortedAnswer[1]?.is_correct || false,
+        answer3: sortedAnswer[2]?.is_correct || false,
+        answer4: sortedAnswer[3]?.is_correct || false,
+      },
+    };
+  }
+
   const {
     register,
     handleSubmit,
     reset,
     setValue,
-    control,
     formState: { errors, isValid },
-  } = useForm<AddQuestionFormType>({
+  } = useForm<EditQuestionFormType>({
     resolver: yupResolver(questionValidateSchema),
-    defaultValues: defaultAddQuestion,
+    defaultValues: defaultEditQuestion,
   });
 
   const {
@@ -89,9 +126,6 @@ const EditQuestionModal = ({
     resolver: yupResolver(urlModalSchema),
   });
 
-  const [defaultEditQuestionState, setDefaultEditQuestionState] =
-    useState(defaultAddQuestion);
-
   const [thumbnailUrl, setThumbnailUrl] = useState("");
 
   const [isUrlModalOpen, setIsUrlModalOpen] = useState(false);
@@ -99,28 +133,8 @@ const EditQuestionModal = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (questionData) {
-      const { data } = questionData;
-
-      const sortedAnswer = [...data.answers].sort(
-        (ans1, ans2) => ans1.id - ans2.id
-      );
-
-      const defaultValues = {
-        title: data.title,
-        thumbnailLink: data.thumbnail_link,
-        answer1: sortedAnswer[0]?.content || "",
-        answer2: sortedAnswer[1]?.content || "",
-        answer3: sortedAnswer[2]?.content || "",
-        answer4: sortedAnswer[3]?.content || "",
-        answerCorrect:
-          sortedAnswer.findIndex((answer) => answer.is_correct) + 1,
-      };
-      setDefaultEditQuestionState(defaultValues);
-      setThumbnailUrl(data.thumbnail_link);
-      reset(defaultValues);
-    }
-  }, [questionData, reset]);
+    setThumbnailUrl(questionData?.data.thumbnail_link || "");
+  }, [questionData?.data.thumbnail_link]);
 
   const [updateQuestion, { isLoading: isUpdateQuestionLoading }] =
     useUpdateQuestionMutation();
@@ -130,15 +144,15 @@ const EditQuestionModal = ({
 
   const [uploadThumbnail] = useUploadThumbnailMutation();
 
-  const handleEditQuestion = async (formData: AddQuestionFormType) => {
+  const handleEditQuestion = async (formData: EditQuestionFormType) => {
     let answersData = questionData?.data.answers;
 
-    const answerCorrect = +formData.answerCorrect;
+    const answerCorrect = formData.answerCorrect;
 
     try {
       if (
-        formData.title !== defaultEditQuestionState.title ||
-        formData.thumbnailLink !== defaultEditQuestionState.thumbnailLink ||
+        formData.title !== defaultEditQuestion.title ||
+        formData.thumbnailLink !== defaultEditQuestion.thumbnailLink ||
         !answersData
       ) {
         const {
@@ -160,13 +174,13 @@ const EditQuestionModal = ({
 
       if (
         formData.answer1 !== answer1.content ||
-        (!answer1.is_correct && answerCorrect === CORRECT_ANSWER.ANSWER_1) ||
-        (answer1.is_correct && answerCorrect !== CORRECT_ANSWER.ANSWER_1)
+        (!answer1.is_correct && answerCorrect.answer1) ||
+        (answer1.is_correct && !answerCorrect.answer1)
       ) {
         updateAnswerPromises.push(
           updateAnswer({
             content: formData.answer1,
-            is_correct: CORRECT_ANSWER.ANSWER_1 === answerCorrect,
+            is_correct: answerCorrect.answer1,
             answerId: answer1.id,
             questionId,
           }).unwrap()
@@ -175,13 +189,13 @@ const EditQuestionModal = ({
 
       if (
         formData.answer2 !== answer2.content ||
-        (!answer2.is_correct && answerCorrect === CORRECT_ANSWER.ANSWER_2) ||
-        (answer2.is_correct && answerCorrect !== CORRECT_ANSWER.ANSWER_2)
+        (!answer2.is_correct && answerCorrect.answer2) ||
+        (answer2.is_correct && !answerCorrect.answer2)
       ) {
         updateAnswerPromises.push(
           updateAnswer({
             content: formData.answer2,
-            is_correct: CORRECT_ANSWER.ANSWER_2 === answerCorrect,
+            is_correct: answerCorrect.answer2,
             answerId: answer2.id,
             questionId,
           }).unwrap()
@@ -190,13 +204,13 @@ const EditQuestionModal = ({
 
       if (
         formData.answer3 !== answer3.content ||
-        (!answer3.is_correct && answerCorrect === CORRECT_ANSWER.ANSWER_3) ||
-        (answer3.is_correct && answerCorrect !== CORRECT_ANSWER.ANSWER_3)
+        (!answer3.is_correct && answerCorrect.answer3) ||
+        (answer3.is_correct && !answerCorrect.answer3)
       ) {
         updateAnswerPromises.push(
           updateAnswer({
             content: formData.answer3,
-            is_correct: CORRECT_ANSWER.ANSWER_3 === answerCorrect,
+            is_correct: answerCorrect.answer3,
             answerId: answer3.id,
             questionId,
           }).unwrap()
@@ -205,13 +219,13 @@ const EditQuestionModal = ({
 
       if (
         formData.answer4 !== answer4.content ||
-        (!answer4.is_correct && answerCorrect === CORRECT_ANSWER.ANSWER_4) ||
-        (answer4.is_correct && answerCorrect !== CORRECT_ANSWER.ANSWER_4)
+        (!answer4.is_correct && answerCorrect.answer4) ||
+        (answer4.is_correct && !answerCorrect.answer4)
       ) {
         updateAnswerPromises.push(
           updateAnswer({
             content: formData.answer4,
-            is_correct: CORRECT_ANSWER.ANSWER_4 === answerCorrect,
+            is_correct: answerCorrect.answer4,
             answerId: answer4.id,
             questionId,
           }).unwrap()
@@ -385,35 +399,12 @@ const EditQuestionModal = ({
         >
           Correct Answer
         </FormLabel>
-        <Controller
-          control={control}
-          name="answerCorrect"
-          defaultValue={1}
-          render={({ field }) => (
-            <RadioGroup row value={field.value} onChange={field.onChange}>
-              <FormControlLabel
-                value={1}
-                control={<Radio />}
-                label="Answer 1"
-              />
-              <FormControlLabel
-                value={2}
-                control={<Radio />}
-                label="Answer 2"
-              />
-              <FormControlLabel
-                value={3}
-                control={<Radio />}
-                label="Answer 3"
-              />
-              <FormControlLabel
-                value={4}
-                control={<Radio />}
-                label="Answer 4"
-              />
-            </RadioGroup>
-          )}
+
+        <CheckboxList
+          register={register}
+          defaultCorrectAnswers={defaultEditQuestion.answerCorrect}
         />
+
         <Typography sx={{ mt: "20px", mb: "16px" }}>Thumbnail</Typography>
 
         <Box display="flex" justifyContent="center">

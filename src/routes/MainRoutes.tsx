@@ -10,7 +10,7 @@ import {
   selectCurrentToken,
   selectCurrentUser,
 } from "../store/features/authSlice";
-import store, { useAppDispatch, useTypedSelector } from "../store/store";
+import { useAppDispatch, useTypedSelector } from "../store/store";
 import { decryptData, sessionDecryptData } from "../utils/lsCryptoJS.util";
 import AdminScreen from "../views/AdminScreen";
 import ForgotPasswordScreen from "../views/ForgotPasswordScreen";
@@ -25,6 +25,7 @@ import { PATH } from "./config";
 const MainRoutes = () => {
   const user = useTypedSelector(selectCurrentUser);
   const token = useTypedSelector(selectCurrentToken);
+
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
 

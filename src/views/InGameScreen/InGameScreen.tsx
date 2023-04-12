@@ -20,6 +20,7 @@ import {
 import LoadingScreen from "../../components/LoadingScreen";
 import COLORS from "../../constants/colors";
 import ResultTable from "./ResultTable";
+import { ThumbnailImage } from "./styles";
 
 const defaultSubmitQuestionsRequest: SubmitQuestionsRequest = {
   listQuestionSubmitted: [],
@@ -27,7 +28,8 @@ const defaultSubmitQuestionsRequest: SubmitQuestionsRequest = {
 
 function InGameScreen() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<null | number>(null);
+  // const [selectedOption, setSelectedOption] = useState<null | number>(null);
+  const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
 
   const [submittedQuestions, setSubmittedQuetions] =
     useState<SubmitQuestionsRequest>(defaultSubmitQuestionsRequest);
@@ -55,19 +57,38 @@ function InGameScreen() {
   }
 
   const handleOptionSelect = (optionId: number) => {
-    setSelectedOption(optionId);
-  };
+    const isOptionSelected = selectedOptions.findIndex(
+      (option) => option === optionId
+    );
 
-  const handleNextQuestion = () => {
-    if (selectedOption === null) {
+    if (isOptionSelected > -1) {
+      setSelectedOptions((prevOptions) =>
+        prevOptions.filter((opId) => opId !== optionId)
+      );
+
       return;
     }
 
+    setSelectedOptions((prevOptions) => [...prevOptions, optionId]);
+  };
+
+  const handleNextQuestion = () => {
+    if (
+      submittedQuestions?.listQuestionSubmitted[currentQuestion + 1]
+        ?.answersSubmittedId[0]
+    ) {
+      setSelectedOptions(
+        submittedQuestions.listQuestionSubmitted[currentQuestion + 1]
+          .answersSubmittedId
+      );
+    }
+    if (selectedOptions.length === 0) {
+      return;
+    }
     const answeredQuestion: ListQuestionSubmitted = {
       id: questions[currentQuestion].id,
-      answersSubmittedId: [selectedOption],
+      answersSubmittedId: selectedOptions,
     };
-
     if (currentQuestion === questions.length - 1) {
       submitQuestions({
         listQuestionSubmitted: [
@@ -83,13 +104,15 @@ function InGameScreen() {
         ],
       }));
     }
-
-    setSelectedOption(null);
     setCurrentQuestion((curr) => curr + 1);
   };
 
   const handleBackQuestion = () => {
     setCurrentQuestion((curr) => curr - 1);
+    setSelectedOptions(
+      submittedQuestions.listQuestionSubmitted[currentQuestion - 1]
+        .answersSubmittedId
+    );
   };
 
   return (
@@ -100,14 +123,8 @@ function InGameScreen() {
           <CardContent>
             {questions[currentQuestion].thumbnail_link && (
               <Box display="flex" justifyContent="center" mb="16px">
-                <img
+                <ThumbnailImage
                   src={questions[currentQuestion].thumbnail_link}
-                  style={{
-                    height: "200px",
-                    width: "auto",
-                    objectFit: "cover",
-                    borderRadius: "8px",
-                  }}
                   alt="question"
                 />
               </Box>
@@ -120,7 +137,9 @@ function InGameScreen() {
                 <Grid item xs={12} sm={6} key={option.id}>
                   <Button
                     variant={
-                      selectedOption === option.id ? "contained" : "outlined"
+                      selectedOptions.includes(option.id)
+                        ? "contained"
+                        : "outlined"
                     }
                     fullWidth
                     onClick={() => handleOptionSelect(option.id)}
@@ -143,7 +162,7 @@ function InGameScreen() {
             <Button
               variant="contained"
               onClick={handleNextQuestion}
-              disabled={selectedOption === null}
+              disabled={selectedOptions.length === 0}
               sx={{ minWidth: "120px" }}
             >
               {currentQuestion === questions.length - 1 ? "Finish" : "Next"}
@@ -160,9 +179,6 @@ function InGameScreen() {
         >
           <Box>
             <Typography variant="h4">Quiz Complete!</Typography>
-            {/* <Typography variant="h6" sx={{ mt: 2 }}>
-              Your score is {submitResponseData?.totalScore}.
-            </Typography> */}
             {data && <ResultTable data={submitResponseData} />}
             <Button
               variant="contained"

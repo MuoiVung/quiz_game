@@ -42,21 +42,21 @@ export interface GetAllQuestionsResponse {
 
 export interface GetAllQuestionsData {
   total: number;
-  result: QuestionData[];
+  result: QuestionDataType[];
   totalPages: number;
   currentPage: number;
 }
 
-export interface QuestionData {
+export interface QuestionDataType {
   id: number;
   title: string;
   thumbnail_link: string;
   createdAt: string;
   updatedAt: string;
-  answers: QuestionAnswers[];
+  answers: QuestionAnswersType[];
 }
 
-export interface QuestionAnswers {
+export interface QuestionAnswersType {
   id: number;
   content: string;
   is_correct: boolean;
@@ -153,7 +153,7 @@ export interface GetQuestionRequest {
 export interface GetQuestionResponse {
   statusCode: number;
   message: string;
-  data: QuestionData;
+  data: QuestionDataType;
 }
 
 // UPDATE QUESTION
@@ -166,7 +166,7 @@ export interface UpdateQuestionRequest {
 export interface UpdateQuestionResponse {
   statusCode: number;
   message: string;
-  data: QuestionData;
+  data: QuestionDataType;
 }
 
 // UPLOAD THUMBNAIL

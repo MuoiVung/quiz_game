@@ -7,6 +7,7 @@ import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined
 import DataTable from "./DataTable";
 import COLORS from "../../constants/colors";
 import {
+  questionsApiSlice,
   useDeleteQuestionMutation,
   useGetAllQuestionsQuery,
 } from "../../api/QuestionsAPI";
@@ -15,6 +16,7 @@ import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import EditQuestionModal from "./EditQuestionModal";
 import QuestionModal from "./QuestionModal";
+import store from "../../store/store";
 
 const QuestionDataTable = ({
   paginationModel,
@@ -68,6 +70,23 @@ const QuestionDataTable = ({
       questionsData?.totalPages,
       setPaginationModel,
     ]
+  );
+
+  const handleEditQuestion = useCallback(
+    async (questionId: number) => {
+      const promise = store.dispatch(
+        questionsApiSlice.endpoints.getQuestion.initiate({ questionId })
+      );
+
+      await toast.promise(promise, {
+        pending: "Fetching question ...",
+        success: "Question data fetched successfully",
+        error: "Failed to fetch question data",
+      });
+
+      onOpenEditModal(questionId);
+    },
+    [onOpenEditModal]
   );
 
   const columns: GridColDef[] = useMemo(
@@ -127,7 +146,7 @@ const QuestionDataTable = ({
                 color: COLORS.BLUE,
               }}
               onClick={() => {
-                onOpenEditModal(+params.id);
+                handleEditQuestion(+params.id);
               }}
             >
               <BorderColorOutlinedIcon />

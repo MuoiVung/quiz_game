@@ -2,6 +2,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { LoadingButton } from "@mui/lab";
 import {
   Box,
+  Button,
   Checkbox,
   FormControlLabel,
   Grid,
@@ -19,6 +20,7 @@ import COLORS from "../../constants/colors";
 import { setCredentials } from "../../store/features/authSlice";
 import { useAppDispatch } from "../../store/store";
 import { LoginFormDataType } from "./types";
+import { updateNumber } from "../../store/features/numberSlice";
 
 const defaultLoginValues: LoginFormDataType = {
   email: "",
@@ -73,6 +75,10 @@ const LoginScreen = () => {
       });
     }
   };
+
+  // const handleUpdateNumber = () => {
+  //   dispatch(updateNumber());
+  // };
 
   return (
     <Grid component="main" container sx={{ height: "100vh" }}>
@@ -188,6 +194,8 @@ const LoginScreen = () => {
           </Link>
         </Box>
       </Grid>
+      {/* Test */}
+      {/* <Button onClick={handleUpdateNumber}>Update number</Button> */}
     </Grid>
   );
 };

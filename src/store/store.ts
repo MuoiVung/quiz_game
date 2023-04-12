@@ -3,6 +3,8 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import api from "../api";
 import authReducer from "./features/authSlice";
 
+import numberReducer from "./features/numberSlice";
+
 export const createStore = (
   options?: ConfigureStoreOptions["preloadedState"] | undefined
 ) =>
@@ -10,6 +12,7 @@ export const createStore = (
     reducer: {
       auth: authReducer,
       [api.reducerPath]: api.reducer,
+      number: numberReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().concat(api.middleware),
