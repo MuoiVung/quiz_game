@@ -22,7 +22,7 @@ import {
   useUploadThumbnailMutation,
 } from "../../api/QuestionsAPI";
 import CheckboxList from "../../components/CheckboxList";
-import CustomModal from "../../components/CustomModal";
+import CustomModal from "../../components/CustomModal/CustomModal";
 import COLORS from "../../constants/colors";
 
 const defaultUrlModal = {

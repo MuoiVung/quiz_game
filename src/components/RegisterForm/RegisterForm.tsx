@@ -24,8 +24,15 @@ const defaultRegisterUser: RegisterFormDataType = {
 
 const schema = yup
   .object({
-    name: yup.string().required("Name is required"),
-    email: yup.string().email("Email is invalid").required("Email is required"),
+    name: yup
+      .string()
+      .max(100, "Name must be less than 100 characters")
+      .required("Name is required"),
+    email: yup
+      .string()
+      .email("Email is invalid")
+      .max(100, "Email must be less than 100 characters")
+      .required("Email is required"),
     password: yup
       .string()
       .required("Password is required")

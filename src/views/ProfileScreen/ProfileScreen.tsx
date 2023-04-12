@@ -21,7 +21,7 @@ import {
 } from "../../api/UsersAPI";
 import LoadingScreen from "../../components/LoadingScreen";
 import COLORS from "../../constants/colors";
-import CustomModal from "../../components/CustomModal";
+import CustomModal from "../../components/CustomModal/CustomModal";
 import { ChangePasswordFormDataType } from "./types";
 import { useForm } from "react-hook-form";
 import { LoadingButton } from "@mui/lab";

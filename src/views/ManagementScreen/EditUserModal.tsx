@@ -17,7 +17,7 @@ import * as yup from "yup";
 import { EditUserFormType, EditUserModalProps } from "./types";
 
 import { useGetUserQuery, useUpdateUserMutation } from "../../api/UsersAPI";
-import CustomModal from "../../components/CustomModal";
+import CustomModal from "../../components/CustomModal/CustomModal";
 import COLORS from "../../constants/colors";
 
 const userValidateSchema = yup

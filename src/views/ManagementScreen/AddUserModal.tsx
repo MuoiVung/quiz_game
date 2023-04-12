@@ -1,54 +1,15 @@
-import { yupResolver } from "@hookform/resolvers/yup";
-import {
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { useForm } from "react-hook-form";
-import * as yup from "yup";
-import { AddUserFormType, BasicModalProps } from "./types";
-
+import { Box, Button, Typography } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import CustomModal from "../../components/CustomModal";
-import COLORS from "../../constants/colors";
-import { useCreateUserMutation } from "../../api/UsersAPI";
 import { toast } from "react-toastify";
+
+import { AddUserFormType, BasicModalProps } from "./types";
 import { ErrorResponseType } from "../../api/AuthAPI/types";
-
-const defaultAddUser: AddUserFormType = {
-  email: "",
-  name: "",
-  password: "",
-  roles: [],
-};
-
-const userValidateSchema = yup
-  .object({
-    name: yup.string().required("Name is required"),
-    email: yup.string().email("Email is invalid").required("Email is required"),
-    password: yup
-      .string()
-      .required("Password is required")
-      .min(6, "Password must be at least 6 characters"),
-    roles: yup.array().min(1, "At least one role must be checked").required(),
-  })
-  .required();
+import { useCreateUserMutation } from "../../api/UsersAPI";
+import CustomModal from "../../components/CustomModal/CustomModal";
+import RegisterForm from "../../components/RegisterForm/RegisterForm";
+import COLORS from "../../constants/colors";
 
 const AddUserModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<AddUserFormType>({
-    resolver: yupResolver(userValidateSchema),
-    defaultValues: defaultAddUser,
-  });
-
   const [addUser, { isLoading: isAddUserLoading }] = useCreateUserMutation();
 
   const handleAddUser = async (data: AddUserFormType) => {
@@ -58,8 +19,7 @@ const AddUserModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
     }
     try {
       await addUser(addUserFormData).unwrap();
-      toast.success("Add new user successfully!");
-      reset();
+
       onCloseModal();
     } catch (error) {
       const errorMessage = (error as ErrorResponseType).data.message;
@@ -70,7 +30,6 @@ const AddUserModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
   };
 
   const handleCloseModal = () => {
-    reset();
     onCloseModal();
   };
 
@@ -86,62 +45,8 @@ const AddUserModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
       >
         Add User
       </Typography>
-      {/* START: ADD QUESTION FORM */}
-      <Box component="form" onSubmit={handleSubmit(handleAddUser)}>
-        <TextField
-          required
-          {...register("name")}
-          error={errors.name ? true : false}
-          helperText={errors.name?.message}
-          name="name"
-          label="Name"
-          autoFocus
-          fullWidth
-          margin="normal"
-          autoComplete="true"
-        />
-        <TextField
-          required
-          {...register("email")}
-          error={errors.email ? true : false}
-          helperText={errors.email?.message}
-          name="email"
-          label="Email"
-          autoFocus
-          fullWidth
-          margin="normal"
-          autoComplete="true"
-        />
-        <TextField
-          type="password"
-          required
-          {...register("password")}
-          error={errors.password ? true : false}
-          helperText={errors.password?.message}
-          name="password"
-          label="Password"
-          fullWidth
-          margin="normal"
-          autoComplete="true"
-        />
-        <Typography sx={{ mt: "12px" }}>
-          Must choose at least one role
-        </Typography>
-        <FormGroup row>
-          <FormControlLabel
-            {...register("roles")}
-            control={<Checkbox />}
-            label="User"
-            value="user"
-          />
-          <FormControlLabel
-            {...register("roles")}
-            control={<Checkbox />}
-            label="Admin"
-            value="admin"
-          />
-        </FormGroup>
-        {/* Buttons */}
+
+      <RegisterForm onSubmitForm={handleAddUser} hasRoleField>
         <Box display="flex" justifyContent="flex-end" my="16px">
           <LoadingButton
             loading={isAddUserLoading}
@@ -151,6 +56,7 @@ const AddUserModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
           >
             Save
           </LoadingButton>
+
           <Button
             color="error"
             variant="contained"
@@ -160,8 +66,7 @@ const AddUserModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
             Cancel
           </Button>
         </Box>
-      </Box>
-      {/* END: ADD QUESTION FORM */}
+      </RegisterForm>
     </CustomModal>
   );
 };

@@ -24,7 +24,7 @@ import {
 } from "../../api/QuestionsAPI";
 import { QuestionAnswersType } from "../../api/QuestionsAPI/types";
 import CheckboxList from "../../components/CheckboxList/CheckboxList";
-import CustomModal from "../../components/CustomModal";
+import CustomModal from "../../components/CustomModal/CustomModal";
 import COLORS from "../../constants/colors";
 
 const defaultUrlModal = {
