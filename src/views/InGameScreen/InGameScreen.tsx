@@ -28,7 +28,6 @@ const defaultSubmitQuestionsRequest: SubmitQuestionsRequest = {
 
 function InGameScreen() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  // const [selectedOption, setSelectedOption] = useState<null | number>(null);
   const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
 
   const [submittedQuestions, setSubmittedQuetions] =

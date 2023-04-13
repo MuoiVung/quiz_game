@@ -22,6 +22,8 @@ import {
   QuestionDataTableProps,
   QuestionRowType,
 } from "./types";
+import { number } from "yup";
+import DeleteModal from "../../components/DeleteModal/DeleteModal";
 
 const QuestionDataTable = ({
   paginationModel,
@@ -34,6 +36,9 @@ const QuestionDataTable = ({
   editModalState,
   onCloseEditModal,
   onOpenEditModal,
+  isDeleteModalOpen,
+  onCloseDeleteModal,
+  onOpenDeleteModal,
 }: QuestionDataTableProps) => {
   const {
     data: questionsData,
@@ -47,11 +52,14 @@ const QuestionDataTable = ({
     sortField,
   });
 
-  const [deleteQuestion] = useDeleteQuestionMutation();
+  const [deleteQuestion, { isLoading: isDeleteQuestionLoading }] =
+    useDeleteQuestionMutation();
 
   const [rowCountState, setRowCountState] = useState(questionsData?.total || 0);
 
   const [isGetQuestionLoading, setIsGetQuestionLoading] = useState(false);
+
+  const [currentQuestionId, setCurrentQuestionId] = useState<null | number>();
 
   const [questionFormData, setQuestionFormData] =
     useState<EditQuestionFormType>({
@@ -69,31 +77,42 @@ const QuestionDataTable = ({
       },
     });
 
-  const handleDeleteQuestion = useCallback(
-    async (questionId: number) => {
-      try {
-        await deleteQuestion({ questionId });
-        if (
-          questionsData?.currentPage === questionsData?.totalPages &&
-          (questionsData?.total || 0) % paginationModel.pageSize === 1
-        ) {
-          setPaginationModel((prev) => ({ ...prev, page: prev.page - 1 }));
-        }
-
-        toast.success("Delete the question successfully.");
-      } catch (error) {
-        toast.error("Failed to delete this question. Please try again later.");
-      }
+  const handleShowDeleteQuestion = useCallback(
+    (questionId: number) => {
+      onOpenDeleteModal();
+      setCurrentQuestionId(questionId);
     },
-    [
-      deleteQuestion,
-      paginationModel.pageSize,
-      questionsData?.currentPage,
-      questionsData?.total,
-      questionsData?.totalPages,
-      setPaginationModel,
-    ]
+    [onOpenDeleteModal]
   );
+
+  const handleDeleteQuestion = useCallback(async () => {
+    if (!currentQuestionId) {
+      return;
+    }
+
+    try {
+      await deleteQuestion({ questionId: currentQuestionId });
+      if (
+        questionsData?.currentPage === questionsData?.totalPages &&
+        (questionsData?.total || 0) % paginationModel.pageSize === 1
+      ) {
+        setPaginationModel((prev) => ({ ...prev, page: prev.page - 1 }));
+      }
+    } catch (error) {
+      toast.error("Failed to delete this question. Please try again later.");
+    } finally {
+      onCloseDeleteModal();
+    }
+  }, [
+    deleteQuestion,
+    paginationModel.pageSize,
+    questionsData?.currentPage,
+    questionsData?.total,
+    questionsData?.totalPages,
+    setPaginationModel,
+    currentQuestionId,
+    onCloseDeleteModal,
+  ]);
 
   const handleEditQuestion = useCallback(
     async (questionId: number) => {
@@ -207,7 +226,7 @@ const QuestionDataTable = ({
                 color: COLORS.RED,
               }}
               onClick={() => {
-                handleDeleteQuestion(+params.id);
+                handleShowDeleteQuestion(+params.id);
               }}
             >
               <DeleteOutlineOutlinedIcon />
@@ -216,7 +235,7 @@ const QuestionDataTable = ({
         ),
       },
     ],
-    [handleDeleteQuestion, handleEditQuestion]
+    [handleEditQuestion, handleShowDeleteQuestion]
   );
 
   const transformQuestionsData: GridRowsProp<QuestionRowType> = useMemo(() => {
@@ -268,6 +287,15 @@ const QuestionDataTable = ({
           questionId={editModalState.id}
           onCloseModal={onCloseEditModal}
           questionFormData={questionFormData}
+        />
+      )}
+      {isDeleteModalOpen && (
+        <DeleteModal
+          isLoading={isDeleteQuestionLoading}
+          title="Delete Question"
+          onCloseModal={onCloseDeleteModal}
+          onConfirmDelete={handleDeleteQuestion}
+          open={isDeleteModalOpen}
         />
       )}
       {/* END: Modal */}

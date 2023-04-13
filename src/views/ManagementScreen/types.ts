@@ -46,6 +46,9 @@ export type GeneralDataTableProps<T> = {
   };
   onOpenEditModal: (id: number) => void;
   onCloseEditModal: () => void;
+  isDeleteModalOpen: boolean;
+  onOpenDeleteModal: () => void;
+  onCloseDeleteModal: () => void;
 };
 
 // QUESTION MANAGEMENT TYPE

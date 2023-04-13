@@ -6,12 +6,18 @@ export const ModalContent = styled(Box)(({ theme }) => ({
   borderRadius: "8px",
   overflow: "scroll",
   maxHeight: "95%",
+  minWidth: 300,
 
   [theme.breakpoints.up("md")]: {
     position: "absolute",
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
+  },
+
+  [theme.breakpoints.down("xs")]: {
+    minWidth: 0,
+    width: "100%",
   },
 }));
 

@@ -11,7 +11,8 @@ import {
   useGetAllUsersQuery,
   usersApiSlice,
 } from "../../api/UsersAPI";
-import CircularSpinner from "../../components/CircularSpinner/CircularSpinner";
+import CircularSpinner from "../../components/CircularSpinner";
+import DeleteModal from "../../components/DeleteModal";
 import COLORS from "../../constants/colors";
 import store from "../../store/store";
 import AddUserModal from "./AddUserModal";
@@ -30,6 +31,9 @@ const UserDataTable = ({
   editModalState,
   onCloseEditModal,
   onOpenEditModal,
+  isDeleteModalOpen,
+  onCloseDeleteModal,
+  onOpenDeleteModal,
 }: UserDataTableProps) => {
   const {
     data: usersData,
@@ -43,7 +47,8 @@ const UserDataTable = ({
     sortField,
   });
 
-  const [deleteUser] = useDeleteUserMutation();
+  const [deleteUser, { isLoading: isDeleteUserLoading }] =
+    useDeleteUserMutation();
 
   const [rowCountState, setRowCountState] = useState(usersData?.total || 0);
 
@@ -53,33 +58,46 @@ const UserDataTable = ({
     roles: [],
   });
 
+  const [currentUserId, setCurrentUserId] = useState<null | number>(null);
+
   const [isGetUserLoading, setIsGetUserLoading] = useState(false);
 
-  const handleDeleteUser = useCallback(
-    async (userId: number) => {
-      try {
-        await deleteUser({ userId });
-        if (
-          usersData?.currentPage === usersData?.totalPages &&
-          (usersData?.total || 0) % paginationModel.pageSize === 1
-        ) {
-          setPaginationModel((prev) => ({ ...prev, page: prev.page - 1 }));
-        }
-
-        toast.success("Delete the question successfully.");
-      } catch (error) {
-        toast.error("Failed to delete this question. Please try again later.");
-      }
+  const handleShowDeleteUser = useCallback(
+    (userId: number) => {
+      onOpenDeleteModal();
+      setCurrentUserId(userId);
     },
-    [
-      deleteUser,
-      paginationModel.pageSize,
-      usersData?.currentPage,
-      usersData?.total,
-      usersData?.totalPages,
-      setPaginationModel,
-    ]
+    [onOpenDeleteModal]
   );
+
+  const handleDeleteUser = useCallback(async () => {
+    if (!currentUserId) {
+      return;
+    }
+
+    try {
+      await deleteUser({ userId: currentUserId });
+      if (
+        usersData?.currentPage === usersData?.totalPages &&
+        (usersData?.total || 0) % paginationModel.pageSize === 1
+      ) {
+        setPaginationModel((prev) => ({ ...prev, page: prev.page - 1 }));
+      }
+    } catch (error) {
+      toast.error("Failed to delete this question. Please try again later.");
+    } finally {
+      onCloseDeleteModal();
+    }
+  }, [
+    deleteUser,
+    paginationModel.pageSize,
+    usersData?.currentPage,
+    usersData?.total,
+    usersData?.totalPages,
+    setPaginationModel,
+    currentUserId,
+    onCloseDeleteModal,
+  ]);
 
   const handleEditUser = useCallback(
     async (userId: number) => {
@@ -194,7 +212,7 @@ const UserDataTable = ({
                 ml: "8px",
                 color: COLORS.RED,
               }}
-              onClick={() => handleDeleteUser(+params.id)}
+              onClick={() => handleShowDeleteUser(+params.id)}
             >
               <DeleteOutlineOutlinedIcon />
             </IconButton>
@@ -202,7 +220,7 @@ const UserDataTable = ({
         ),
       },
     ],
-    [handleDeleteUser, handleEditUser]
+    [handleEditUser, handleShowDeleteUser]
   );
 
   const transformQuestionsData: GridRowsProp<UserRowType> = useMemo(() => {
@@ -255,6 +273,15 @@ const UserDataTable = ({
           userId={editModalState.id}
           onCloseModal={onCloseEditModal}
           userFormData={userFormData}
+        />
+      )}
+      {isDeleteModalOpen && (
+        <DeleteModal
+          isLoading={isDeleteUserLoading}
+          title="Delete User"
+          onCloseModal={onCloseDeleteModal}
+          onConfirmDelete={handleDeleteUser}
+          open={isDeleteModalOpen}
         />
       )}
       {isGetUserLoading && <CircularSpinner isLoading={isGetUserLoading} />}

@@ -33,7 +33,12 @@ const AddUserModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
   };
 
   return (
-    <FormModal onClose={handleCloseModal} open={isOpen} title="Add User">
+    <FormModal
+      isLoading={isAddUserLoading}
+      onClose={handleCloseModal}
+      open={isOpen}
+      title="Add User"
+    >
       <RegisterForm onSubmitForm={handleAddUser} hasRoleField>
         <FormModalButton
           loading={isAddUserLoading}

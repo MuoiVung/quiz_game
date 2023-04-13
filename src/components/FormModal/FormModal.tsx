@@ -9,7 +9,7 @@ const FormModal = ({
   onClose,
   children,
   title,
-  isLoading,
+  isLoading = false,
 }: FormModalProps) => {
   return (
     <>
@@ -21,12 +21,12 @@ const FormModal = ({
             </IconButton>
           </Box>
           <Box pb={2} px={4}>
-            <FormModalHeader variant="h4">{title}</FormModalHeader>
+            <FormModalHeader variant="h5">{title}</FormModalHeader>
             {children}
           </Box>
         </ModalContent>
       </ModalContainer>
-      <CircularSpinner isLoading={isLoading || false} />
+      <CircularSpinner isLoading={isLoading} />
     </>
   );
 };

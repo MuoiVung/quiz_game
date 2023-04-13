@@ -180,7 +180,12 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
   };
 
   return (
-    <FormModal onClose={handleCloseModal} open={isOpen} title="Add Question">
+    <FormModal
+      onClose={handleCloseModal}
+      open={isOpen}
+      title="Add Question"
+      isLoading={isAddNewAnswerLoading || isAddNewQuestionLoading}
+    >
       {/* START: ADD QUESTION FORM */}
       <Box
         component="form"

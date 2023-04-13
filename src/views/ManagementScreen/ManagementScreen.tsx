@@ -28,6 +28,7 @@ const ManagementScreen = () => {
     open: false,
     id: 0,
   });
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleSelectType = (event: SelectChangeEvent) => {
     setType(event.target.value as MangementType);
@@ -68,6 +69,14 @@ const ManagementScreen = () => {
     setEditModalState((prevState) => ({ ...prevState, open: false }));
   }, []);
 
+  const handleOpenDeleteModal = useCallback(() => {
+    setIsDeleteModalOpen(true);
+  }, []);
+
+  const handleCloseDeleteModal = useCallback(() => {
+    setIsDeleteModalOpen(false);
+  }, []);
+
   return (
     <Box sx={{ p: 2 }}>
       <ManagementToolbar
@@ -96,6 +105,9 @@ const ManagementScreen = () => {
             onCloseEditModal={handleCloseEditModal}
             onOpenEditModal={handleOpenEditModal}
             editModalState={editModalState}
+            isDeleteModalOpen={isDeleteModalOpen}
+            onOpenDeleteModal={handleOpenDeleteModal}
+            onCloseDeleteModal={handleCloseDeleteModal}
           />
         )}
         {type === "user" && (
@@ -110,6 +122,9 @@ const ManagementScreen = () => {
             onCloseEditModal={handleCloseEditModal}
             onOpenEditModal={handleOpenEditModal}
             editModalState={editModalState}
+            isDeleteModalOpen={isDeleteModalOpen}
+            onOpenDeleteModal={handleOpenDeleteModal}
+            onCloseDeleteModal={handleCloseDeleteModal}
           />
         )}
       </Box>
