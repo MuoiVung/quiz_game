@@ -1,8 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { LoadingButton } from "@mui/lab";
 import {
   Box,
-  Button,
   Checkbox,
   FormControlLabel,
   FormGroup,
@@ -13,14 +11,12 @@ import { isEqual } from "lodash";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import * as yup from "yup";
+import { memo } from "react";
 
 import { EditUserFormType, EditUserModalProps } from "./types";
-
-import { useGetUserQuery, useUpdateUserMutation } from "../../api/UsersAPI";
-import CustomModal from "../../components/CustomModal/CustomModal";
-import COLORS from "../../constants/colors";
-import FormModalButton from "../../components/FormModalButton/FormModalButton";
+import { useUpdateUserMutation } from "../../api/UsersAPI";
 import FormModal from "../../components/FormModal/FormModal";
+import FormModalButton from "../../components/FormModalButton/FormModalButton";
 
 const userValidateSchema = yup
   .object({
@@ -34,21 +30,10 @@ const EditUserModal = ({
   isOpen,
   onCloseModal,
   userId,
+  userFormData,
 }: EditUserModalProps) => {
-  const {
-    data: userData,
-    isLoading: isGetUserLoading,
-    isFetching: isGetUserFetching,
-  } = useGetUserQuery({ userId });
-
   const [updateUser, { isLoading: isUpdateUserLoading }] =
     useUpdateUserMutation();
-
-  const defaultValues: EditUserFormType = {
-    email: userData?.data.email || " ",
-    name: userData?.data.name || " ",
-    roles: userData?.data.roles ? [...userData?.data.roles] : [],
-  };
 
   const {
     register,
@@ -57,27 +42,26 @@ const EditUserModal = ({
     formState: { errors },
   } = useForm<EditUserFormType>({
     resolver: yupResolver(userValidateSchema),
-    defaultValues: defaultValues,
+    defaultValues: userFormData,
   });
 
   const handleEditUser = async (formData: EditUserFormType) => {
     try {
       const { roles: formDataRoles } = formData;
-      const { roles: defaultRoles } = defaultValues;
+      const { roles: defaultRoles } = userFormData;
       const areRolesSame = isEqual(formDataRoles, defaultRoles);
 
       if (
-        formData.email !== defaultValues.email ||
-        formData.name !== defaultValues.name ||
+        formData.email !== userFormData.email ||
+        formData.name !== userFormData.name ||
         !areRolesSame
       ) {
         await updateUser({ ...formData, userId });
       }
-      toast.success("Edit question successuflly!");
       reset();
       onCloseModal();
     } catch (error) {
-      toast.error("Failed to edit question!", {
+      toast.error("Failed to edit user!", {
         position: "top-center",
       });
     }
@@ -89,18 +73,12 @@ const EditUserModal = ({
   };
 
   return (
-    <FormModal onClose={handleCloseModal} open={isOpen}>
-      <Typography
-        variant="h4"
-        fontFamily="poppins"
-        sx={{
-          textAlign: "center",
-          mb: "12px",
-        }}
-      >
-        Edit User
-      </Typography>
-      {/* START: ADD QUESTION FORM */}
+    <FormModal
+      onClose={handleCloseModal}
+      open={isOpen}
+      title="Edit User"
+      isLoading={isUpdateUserLoading}
+    >
       <Box component="form" onSubmit={handleSubmit(handleEditUser)}>
         <TextField
           required
@@ -111,8 +89,8 @@ const EditUserModal = ({
           label="Name"
           autoFocus
           fullWidth
-          margin="normal"
           autoComplete="true"
+          margin="normal"
         />
         <TextField
           required
@@ -123,8 +101,8 @@ const EditUserModal = ({
           label="Email"
           autoFocus
           fullWidth
-          margin="normal"
           autoComplete="true"
+          margin="normal"
         />
         <Typography sx={{ mt: "12px" }}>
           Must choose at least one role
@@ -133,7 +111,7 @@ const EditUserModal = ({
           <FormControlLabel
             {...register("roles")}
             control={
-              <Checkbox defaultChecked={defaultValues.roles.includes("user")} />
+              <Checkbox defaultChecked={userFormData.roles.includes("user")} />
             }
             label="User"
             value="user"
@@ -141,9 +119,7 @@ const EditUserModal = ({
           <FormControlLabel
             {...register("roles")}
             control={
-              <Checkbox
-                defaultChecked={defaultValues.roles.includes("admin")}
-              />
+              <Checkbox defaultChecked={userFormData.roles.includes("admin")} />
             }
             value="admin"
             label="Admin"
@@ -151,13 +127,12 @@ const EditUserModal = ({
         </FormGroup>
         {/* Buttons */}
         <FormModalButton
-          loading={isUpdateUserLoading || isGetUserFetching || isGetUserLoading}
+          loading={isUpdateUserLoading}
           onCloseModal={handleCloseModal}
         />
       </Box>
-      {/* END: ADD QUESTION FORM */}
     </FormModal>
   );
 };
 
-export default EditUserModal;
+export default memo(EditUserModal);

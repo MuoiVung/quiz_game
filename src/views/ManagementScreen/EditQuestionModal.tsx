@@ -14,20 +14,18 @@ import { toast } from "react-toastify";
 import * as yup from "yup";
 import { EditQuestionFormType, EditQuestionModalProps } from "./types";
 
-import { LoadingButton } from "@mui/lab";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, memo, useEffect, useRef, useState } from "react";
 import { useUpdateAnswerMutation } from "../../api/AnswersAPI";
 import {
   useGetQuestionQuery,
   useUpdateQuestionMutation,
   useUploadThumbnailMutation,
 } from "../../api/QuestionsAPI";
-import { QuestionAnswersType } from "../../api/QuestionsAPI/types";
 import CheckboxList from "../../components/CheckboxList/CheckboxList";
-import CustomModal from "../../components/CustomModal/CustomModal";
-import COLORS from "../../constants/colors";
 import FormModal from "../../components/FormModal";
-import FormModalButton from "../../components/FormModalButton/FormModalButton";
+import FormModalButton from "../../components/FormModalButton";
+import COLORS from "../../constants/colors";
+import Thumbnail from "../../components/Thumbnail";
 
 const defaultUrlModal = {
   url: "",
@@ -51,56 +49,19 @@ const EditQuestionModal = ({
   isOpen,
   onCloseModal,
   questionId,
+  questionFormData,
 }: EditQuestionModalProps) => {
   const { data: questionData } = useGetQuestionQuery({ questionId });
-
-  let defaultEditQuestion: EditQuestionFormType = {
-    title: " ",
-    thumbnailLink: " ",
-    answer1: " ",
-    answer2: " ",
-    answer3: " ",
-    answer4: " ",
-    answerCorrect: {
-      answer1: false,
-      answer2: false,
-      answer3: false,
-      answer4: false,
-    },
-  };
-
-  let sortedAnswer: QuestionAnswersType[] = [];
-
-  if (questionData?.data.answers) {
-    sortedAnswer = [...questionData?.data.answers].sort(
-      (ans1, ans2) => ans1.id - ans2.id
-    );
-
-    defaultEditQuestion = {
-      title: questionData?.data.title,
-      thumbnailLink: questionData?.data.thumbnail_link,
-      answer1: sortedAnswer[0]?.content || "",
-      answer2: sortedAnswer[1]?.content || "",
-      answer3: sortedAnswer[2]?.content || "",
-      answer4: sortedAnswer[3]?.content || "",
-      answerCorrect: {
-        answer1: sortedAnswer[0]?.is_correct || false,
-        answer2: sortedAnswer[1]?.is_correct || false,
-        answer3: sortedAnswer[2]?.is_correct || false,
-        answer4: sortedAnswer[3]?.is_correct || false,
-      },
-    };
-  }
 
   const {
     register,
     handleSubmit,
     reset,
     setValue,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useForm<EditQuestionFormType>({
     resolver: yupResolver(questionValidateSchema),
-    defaultValues: defaultEditQuestion,
+    defaultValues: questionFormData,
   });
 
   const {
@@ -129,7 +90,8 @@ const EditQuestionModal = ({
   const [updateAnswer, { isLoading: isUpdateAnswerLoading }] =
     useUpdateAnswerMutation();
 
-  const [uploadThumbnail] = useUploadThumbnailMutation();
+  const [uploadThumbnail, { isLoading: isUpdateThumbnailLoading }] =
+    useUploadThumbnailMutation();
 
   const handleEditQuestion = async (formData: EditQuestionFormType) => {
     let answersData = questionData?.data.answers;
@@ -138,8 +100,8 @@ const EditQuestionModal = ({
 
     try {
       if (
-        formData.title !== defaultEditQuestion.title ||
-        formData.thumbnailLink !== defaultEditQuestion.thumbnailLink ||
+        formData.title !== questionFormData.title ||
+        formData.thumbnailLink !== questionFormData.thumbnailLink ||
         !answersData
       ) {
         const {
@@ -221,7 +183,6 @@ const EditQuestionModal = ({
 
       await Promise.all(updateAnswerPromises);
 
-      toast.success("Edit question successuflly!");
       reset();
       onCloseModal();
     } catch (error) {
@@ -267,19 +228,12 @@ const EditQuestionModal = ({
     formData.append("thumbnail", files[0]);
 
     try {
-      const response = await toast.promise(
-        () => uploadThumbnail(formData).unwrap(),
-        {
-          pending: "Uploading...",
-          success: "Uploaded thumbnail successfully",
-          error: "Failed to upload thumbnail",
-        }
-      );
+      const response = await uploadThumbnail(formData).unwrap();
 
       setValue("thumbnailLink", response.data);
       setThumbnailUrl(response.data);
     } catch (error) {
-      console.error("Faild to upload thumbnail");
+      toast.error("Failed to upload thumbnail");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -287,19 +241,22 @@ const EditQuestionModal = ({
   };
 
   return (
-    <FormModal onClose={handleCloseModal} open={isOpen}>
-      <Typography
-        variant="h4"
-        fontFamily="poppins"
-        sx={{
-          textAlign: "center",
-          mb: "12px",
-        }}
-      >
-        Edit Question
-      </Typography>
+    <FormModal
+      onClose={handleCloseModal}
+      open={isOpen}
+      title="Edit Question"
+      isLoading={
+        isUpdateQuestionLoading ||
+        isUpdateAnswerLoading ||
+        isUpdateThumbnailLoading
+      }
+    >
       {/* START: ADD QUESTION FORM */}
-      <Box component="form" onSubmit={handleSubmit(handleEditQuestion)}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit(handleEditQuestion)}
+        pt="16px"
+      >
         <Grid
           container
           sx={{ maxHeight: "500px", overflowY: "auto" }}
@@ -384,20 +341,13 @@ const EditQuestionModal = ({
 
         <CheckboxList
           register={register}
-          defaultCorrectAnswers={defaultEditQuestion.answerCorrect}
+          defaultCorrectAnswers={questionFormData.answerCorrect}
         />
 
         <Typography sx={{ mt: "20px", mb: "16px" }}>Thumbnail</Typography>
 
         <Box display="flex" justifyContent="center">
-          <Avatar
-            alt="thumbnail"
-            sx={{
-              width: "50px",
-              height: "50px",
-            }}
-            src={thumbnailUrl}
-          />
+          <Thumbnail src={thumbnailUrl} />
         </Box>
 
         <Stack spacing="2px" justifyContent="center" mt={2}>
@@ -448,4 +398,4 @@ const EditQuestionModal = ({
   );
 };
 
-export default EditQuestionModal;
+export default memo(EditQuestionModal);

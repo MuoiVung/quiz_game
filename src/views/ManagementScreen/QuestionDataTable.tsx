@@ -1,22 +1,27 @@
-import { GridCellParams, GridColDef, GridRowsProp } from "@mui/x-data-grid";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Box, IconButton } from "@mui/material";
 import BorderColorOutlinedIcon from "@mui/icons-material/BorderColorOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import { Box, IconButton } from "@mui/material";
+import { GridCellParams, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import DataTable from "./DataTable";
-import COLORS from "../../constants/colors";
+import dayjs from "dayjs";
+import { toast } from "react-toastify";
 import {
   questionsApiSlice,
   useDeleteQuestionMutation,
   useGetAllQuestionsQuery,
 } from "../../api/QuestionsAPI";
-import { QuestionDataTableProps, QuestionRowType } from "./types";
-import { toast } from "react-toastify";
-import dayjs from "dayjs";
+import CircularSpinner from "../../components/CircularSpinner/CircularSpinner";
+import COLORS from "../../constants/colors";
+import store from "../../store/store";
+import DataTable from "./DataTable";
 import EditQuestionModal from "./EditQuestionModal";
 import QuestionModal from "./QuestionModal";
-import store from "../../store/store";
+import {
+  EditQuestionFormType,
+  QuestionDataTableProps,
+  QuestionRowType,
+} from "./types";
 
 const QuestionDataTable = ({
   paginationModel,
@@ -46,6 +51,24 @@ const QuestionDataTable = ({
 
   const [rowCountState, setRowCountState] = useState(questionsData?.total || 0);
 
+  const [isGetQuestionLoading, setIsGetQuestionLoading] = useState(false);
+
+  const [questionFormData, setQuestionFormData] =
+    useState<EditQuestionFormType>({
+      title: " ",
+      thumbnailLink: " ",
+      answer1: " ",
+      answer2: " ",
+      answer3: " ",
+      answer4: " ",
+      answerCorrect: {
+        answer1: false,
+        answer2: false,
+        answer3: false,
+        answer4: false,
+      },
+    });
+
   const handleDeleteQuestion = useCallback(
     async (questionId: number) => {
       try {
@@ -74,17 +97,43 @@ const QuestionDataTable = ({
 
   const handleEditQuestion = useCallback(
     async (questionId: number) => {
-      const promise = store.dispatch(
-        questionsApiSlice.endpoints.getQuestion.initiate({ questionId })
-      );
+      try {
+        setIsGetQuestionLoading(true);
 
-      await toast.promise(promise, {
-        pending: "Fetching question ...",
-        success: "Question data fetched successfully",
-        error: "Failed to fetch question data",
-      });
+        const questionData = await store
+          .dispatch(
+            questionsApiSlice.endpoints.getQuestion.initiate({ questionId })
+          )
+          .unwrap();
 
-      onOpenEditModal(questionId);
+        const sortedAnswer = [...questionData.data.answers].sort(
+          (ans1, ans2) => ans1.id - ans2.id
+        );
+
+        const transformedQuestionForm: EditQuestionFormType = {
+          title: questionData.data.title,
+          thumbnailLink: questionData?.data.thumbnail_link,
+          answer1: sortedAnswer[0].content,
+          answer2: sortedAnswer[1].content,
+          answer3: sortedAnswer[2].content,
+          answer4: sortedAnswer[3].content,
+          answerCorrect: {
+            answer1: sortedAnswer[0].is_correct,
+            answer2: sortedAnswer[1].is_correct,
+            answer3: sortedAnswer[2].is_correct,
+            answer4: sortedAnswer[3].is_correct,
+          },
+        };
+
+        setQuestionFormData(transformedQuestionForm);
+        onOpenEditModal(questionId);
+      } catch (error) {
+        toast.error(
+          "Failed to get question information! Please try again later!"
+        );
+      } finally {
+        setIsGetQuestionLoading(false);
+      }
     },
     [onOpenEditModal]
   );
@@ -167,7 +216,7 @@ const QuestionDataTable = ({
         ),
       },
     ],
-    [handleDeleteQuestion, onOpenEditModal]
+    [handleDeleteQuestion, handleEditQuestion]
   );
 
   const transformQuestionsData: GridRowsProp<QuestionRowType> = useMemo(() => {
@@ -218,9 +267,13 @@ const QuestionDataTable = ({
           isOpen={editModalState.open}
           questionId={editModalState.id}
           onCloseModal={onCloseEditModal}
+          questionFormData={questionFormData}
         />
       )}
       {/* END: Modal */}
+      {isGetQuestionLoading && (
+        <CircularSpinner isLoading={isGetQuestionLoading} />
+      )}
     </Box>
   );
 };

@@ -5,7 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import theme from "./constants/theme";
+import theme from "./styles/theme";
 import MainRoutes from "./routes/MainRoutes";
 import store from "./store/store";
 

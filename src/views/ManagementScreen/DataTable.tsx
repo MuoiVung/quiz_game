@@ -15,7 +15,7 @@ const DataTable = ({
   columns,
   rows,
   rowCount,
-  paginationOptions = [5],
+  paginationOptions = [5, 10, 25],
   paginationModel,
   onPaginationModelChange,
   loading,

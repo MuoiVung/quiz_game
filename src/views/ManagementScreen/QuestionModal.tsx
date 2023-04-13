@@ -65,7 +65,7 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
     handleSubmit,
     reset,
     setValue,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useForm<AddQuestionFormType>({
     resolver: yupResolver(questionValidateSchema),
     defaultValues: defaultAddQuestion,
@@ -102,12 +102,14 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
         title: data.title,
         thumbnail_link: data.thumbnailLink || "",
       }).unwrap();
+
       const answers = [
         { content: data.answer1, is_correct: data.answerCorrect.answer1 },
         { content: data.answer2, is_correct: data.answerCorrect.answer2 },
         { content: data.answer3, is_correct: data.answerCorrect.answer3 },
         { content: data.answer4, is_correct: data.answerCorrect.answer4 },
       ];
+
       const promises = answers.map((answer) =>
         addNewAnswers({ ...answer, questionId })
       );
@@ -178,19 +180,13 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
   };
 
   return (
-    <FormModal onClose={handleCloseModal} open={isOpen}>
-      <Typography
-        variant="h4"
-        fontFamily="poppins"
-        sx={{
-          textAlign: "center",
-          mb: "24px",
-        }}
-      >
-        Add Question
-      </Typography>
+    <FormModal onClose={handleCloseModal} open={isOpen} title="Add Question">
       {/* START: ADD QUESTION FORM */}
-      <Box component="form" onSubmit={handleSubmit(handleAddQuestion)}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit(handleAddQuestion)}
+        pt="16px"
+      >
         <Grid
           container
           sx={{ maxHeight: "500px", overflowY: "auto" }}

@@ -1,5 +1,5 @@
 import { createTheme } from "@mui/material/styles";
-import COLORS from "./colors";
+import COLORS from "../constants/colors";
 
 const theme = createTheme({
   palette: {
@@ -9,6 +9,7 @@ const theme = createTheme({
     background: {
       default: COLORS.WHITE,
     },
+
     common: {
       YELLOW_100: "#fef4d3",
       YELLOW_200: "#fee9a7",

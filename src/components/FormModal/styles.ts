@@ -1,10 +1,11 @@
-import { Box, Modal, styled } from "@mui/material";
+import { Box, Modal, Typography, styled } from "@mui/material";
+import FONTS from "../../constants/fonts";
 
 export const ModalContent = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   borderRadius: "8px",
   overflow: "scroll",
-  maxHeight: "90%",
+  maxHeight: "95%",
 
   [theme.breakpoints.up("md")]: {
     position: "absolute",
@@ -30,4 +31,11 @@ export const ModalContainer = styled(Modal)(({ theme }) => ({
     justifyContent: "center",
     margin: "8px",
   },
+}));
+
+export const FormModalHeader = styled(Typography)(({ theme }) => ({
+  fontFamily: FONTS.POPPINS,
+  textAlign: "center",
+  marginBottom: 16,
+  textTransform: "capitalize",
 }));

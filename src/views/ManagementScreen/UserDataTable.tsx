@@ -11,12 +11,13 @@ import {
   useGetAllUsersQuery,
   usersApiSlice,
 } from "../../api/UsersAPI";
+import CircularSpinner from "../../components/CircularSpinner/CircularSpinner";
 import COLORS from "../../constants/colors";
+import store from "../../store/store";
 import AddUserModal from "./AddUserModal";
 import DataTable from "./DataTable";
 import EditUserModal from "./EditUserModal";
-import { UserDataTableProps, UserRowType } from "./types";
-import store from "../../store/store";
+import { EditUserFormType, UserDataTableProps, UserRowType } from "./types";
 
 const UserDataTable = ({
   paginationModel,
@@ -46,6 +47,14 @@ const UserDataTable = ({
 
   const [rowCountState, setRowCountState] = useState(usersData?.total || 0);
 
+  const [userFormData, setUserFormData] = useState<EditUserFormType>({
+    email: "",
+    name: "",
+    roles: [],
+  });
+
+  const [isGetUserLoading, setIsGetUserLoading] = useState(false);
+
   const handleDeleteUser = useCallback(
     async (userId: number) => {
       try {
@@ -74,19 +83,29 @@ const UserDataTable = ({
 
   const handleEditUser = useCallback(
     async (userId: number) => {
-      const promise = store.dispatch(
-        usersApiSlice.endpoints.getUser.initiate({
-          userId,
-        })
-      );
+      try {
+        setIsGetUserLoading(true);
 
-      await toast.promise(promise, {
-        pending: "Fetching user data...",
-        success: "User data fetched successfully!",
-        error: "Failed to fetch user data.",
-      });
+        const userData = await store
+          .dispatch(
+            usersApiSlice.endpoints.getUser.initiate({
+              userId,
+            })
+          )
+          .unwrap();
 
-      onOpenEditModal(userId);
+        const transformedUserForm = {
+          email: userData?.data.email,
+          name: userData?.data.name,
+          roles: [...userData?.data.roles],
+        };
+        setUserFormData(transformedUserForm);
+        onOpenEditModal(userId);
+      } catch (error) {
+        toast.error("Failed to get user information! Please try again later!");
+      } finally {
+        setIsGetUserLoading(false);
+      }
     },
     [onOpenEditModal]
   );
@@ -235,8 +254,10 @@ const UserDataTable = ({
           isOpen={editModalState.open}
           userId={editModalState.id}
           onCloseModal={onCloseEditModal}
+          userFormData={userFormData}
         />
       )}
+      {isGetUserLoading && <CircularSpinner isLoading={isGetUserLoading} />}
       {/* END: Modal */}
     </Box>
   );

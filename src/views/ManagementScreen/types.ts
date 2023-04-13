@@ -6,7 +6,11 @@ import {
 } from "@mui/x-data-grid";
 import { SetStateAction } from "react";
 import { OrderType, QuestionSortFieldType } from "../../api/QuestionsAPI/types";
-import { UserRoleType, UserSortFiedType } from "../../api/UsersAPI/types";
+import {
+  GetUserResponse,
+  UserRoleType,
+  UserSortFiedType,
+} from "../../api/UsersAPI/types";
 
 export type MangementType = "user" | "question";
 
@@ -93,6 +97,7 @@ export type EditQuestionModalProps = {
   isOpen: boolean;
   onCloseModal: () => void;
   questionId: number;
+  questionFormData: EditQuestionFormType;
 };
 
 export type QuestionModalType = "edit" | "add";
@@ -131,6 +136,7 @@ export type EditUserModalProps = {
   isOpen: boolean;
   onCloseModal: () => void;
   userId: number;
+  userFormData: EditUserFormType;
 };
 
 export type EditUserFormType = {
