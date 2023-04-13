@@ -78,9 +78,9 @@ const ForgotPasswordScreen = () => {
 
         <AuthButtonContainer
           btnLeftUrl="/register"
-          btnLeftContent="Don't have an account? Sign Up"
+          btnLeftContent="Return to Sign Up"
           btnRightUrl="/login"
-          btnRightContent="Already have an account? Login here!"
+          btnRightContent="Return to Login here!"
         />
       </Grid>
     </AuthContainer>

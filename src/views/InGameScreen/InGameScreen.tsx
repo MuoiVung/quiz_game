@@ -72,47 +72,52 @@ function InGameScreen() {
   };
 
   const handleNextQuestion = () => {
-    if (
-      submittedQuestions?.listQuestionSubmitted[currentQuestion + 1]
-        ?.answersSubmittedId[0]
-    ) {
-      setSelectedOptions(
-        submittedQuestions.listQuestionSubmitted[currentQuestion + 1]
-          .answersSubmittedId
-      );
-    }
-    if (selectedOptions.length === 0) {
-      return;
-    }
-    const answeredQuestion: ListQuestionSubmitted = {
-      id: questions[currentQuestion].id,
-      answersSubmittedId: selectedOptions,
-    };
-    if (currentQuestion === questions.length - 1) {
-      submitQuestions({
-        listQuestionSubmitted: [
-          ...submittedQuestions.listQuestionSubmitted,
-          answeredQuestion,
-        ],
-      });
-    } else {
-      setSubmittedQuetions((curr) => ({
-        listQuestionSubmitted: [
-          ...curr.listQuestionSubmitted,
-          answeredQuestion,
-        ],
-      }));
-    }
+    // if (
+    //   submittedQuestions?.listQuestionSubmitted[currentQuestion + 1]
+    //     ?.answersSubmittedId[0]
+    // ) {
+    //   setSelectedOptions(
+    //     submittedQuestions.listQuestionSubmitted[currentQuestion + 1]
+    //       .answersSubmittedId
+    //   );
+    // }
+
+    // if (selectedOptions.length === 0) {
+    //   return;
+    // }
+
+    // const answeredQuestion: ListQuestionSubmitted = {
+    //   id: questions[currentQuestion].id,
+    //   answersSubmittedId: selectedOptions,
+    // };
+
+    // if (currentQuestion === questions.length - 1) {
+    //   submitQuestions({
+    //     listQuestionSubmitted: [
+    //       ...submittedQuestions.listQuestionSubmitted,
+    //       answeredQuestion,
+    //     ],
+    //   });
+    // } else {
+    //   setSubmittedQuetions((curr) => ({
+    //     listQuestionSubmitted: [
+    //       ...curr.listQuestionSubmitted,
+    //       answeredQuestion,
+    //     ],
+    //   }));
+    // }
     setCurrentQuestion((curr) => curr + 1);
   };
 
   const handleBackQuestion = () => {
     setCurrentQuestion((curr) => curr - 1);
-    setSelectedOptions(
-      submittedQuestions.listQuestionSubmitted[currentQuestion - 1]
-        .answersSubmittedId
-    );
+    // setSelectedOptions(
+    //   submittedQuestions.listQuestionSubmitted[currentQuestion - 1]
+    //     .answersSubmittedId
+    // );
   };
+
+  console.log(selectedOptions);
 
   return (
     <Box sx={{ p: 2 }}>

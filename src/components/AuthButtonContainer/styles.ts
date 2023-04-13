@@ -13,5 +13,6 @@ export const ButtonItem = styled(Link)(({ theme }) => ({
   },
   [theme.breakpoints.down("lg")]: {
     padding: "4px 0",
+    textAlign: "center",
   },
 }));

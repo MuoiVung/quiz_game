@@ -7,7 +7,7 @@ const CircularSpinner = ({ isLoading }: CircularSpinnerProps) => {
     <Backdrop
       open={isLoading}
       sx={{
-        zIndex: (theme) => theme.zIndex.drawer + 999,
+        zIndex: 999,
         backgroundColor: "rgba(0,0,0,0.1)",
       }}
     >

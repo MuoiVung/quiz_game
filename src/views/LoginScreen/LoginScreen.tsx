@@ -76,7 +76,7 @@ const LoginScreen = () => {
   };
 
   return (
-    <AuthContainer>
+    <AuthContainer container>
       <Brand />
 
       <Grid item xs={12} sm={8} md={6} p={4}>
@@ -112,13 +112,7 @@ const LoginScreen = () => {
             autoComplete="true"
           />
           <FormControlLabel
-            control={
-              <Checkbox
-                {...register("isRemember")}
-                // value="true"
-                color="primary"
-              />
-            }
+            control={<Checkbox {...register("isRemember")} color="primary" />}
             label="Remember me"
           />
           <SubmitButton loading={isLoading} content="Sign in" />
