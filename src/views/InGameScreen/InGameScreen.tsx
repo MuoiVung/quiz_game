@@ -25,6 +25,7 @@ import {
 import ResultTable from "./ResultTable";
 import { ThumbnailImage } from "./styles";
 import { IngameDataType } from "./types";
+import Review from "../../components/Review";
 
 function InGameScreen() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -157,7 +158,9 @@ function InGameScreen() {
                     fullWidth
                     onClick={() => handleOptionSelect(option.id)}
                   >
-                    {option.content}
+                    {option.content.length > 30
+                      ? option.content.slice(0, 30) + "..."
+                      : option.content}
                   </Button>
                 </Grid>
               ))}
@@ -187,27 +190,30 @@ function InGameScreen() {
           </Box>
         </Card>
       ) : (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Box>
-            <Typography variant="h4">Quiz Complete!</Typography>
-            {questionData && <ResultTable data={submitResponseData} />}
-            <Button
-              variant="contained"
-              fullWidth
-              sx={{ mt: "16px", zIndex: 999, color: COLORS.WHITE }}
-              component={Link}
-              to="/play"
-            >
-              Play Again
-            </Button>
-          </Box>
-        </Box>
+        //  : (
+        //   <Box
+        //     sx={{
+        //       display: "flex",
+        //       alignItems: "center",
+        //       justifyContent: "center",
+        //     }}
+        //   >
+        //     <Box>
+        //       <Typography variant="h4">Quiz Complete!</Typography>
+        //       {submitResponseData && <ResultTable data={submitResponseData} />}
+        //       <Button
+        //         variant="contained"
+        //         fullWidth
+        //         sx={{ mt: "16px", zIndex: 999, color: COLORS.WHITE }}
+        //         component={Link}
+        //         to="/play"
+        //       >
+        //         Play Again
+        //       </Button>
+        //     </Box>
+        //   </Box>
+        // )
+        submitResponseData && <Review result={submitResponseData} />
       )}
     </Box>
   );

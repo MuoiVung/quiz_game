@@ -1,26 +1,39 @@
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import LogoutIcon from "@mui/icons-material/Logout";
+import PersonIcon from "@mui/icons-material/Person";
+import MenuIcon from "@mui/icons-material/Menu";
 import {
   AppBar,
   Avatar,
   Box,
+  Divider,
   IconButton,
+  ListItemIcon,
+  ListItemText,
   Menu,
   MenuItem,
-  Toolbar,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { memo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+
+import { useGetUserProfleQuery } from "../api/UsersAPI";
 import IconSvg from "../components/IconSvg";
 import COLORS from "../constants/colors";
 import { logout, selectCurrentUser } from "../store/features/authSlice";
 import { useTypedSelector } from "../store/store";
-import { useGetUserProfleQuery } from "../api/UsersAPI";
+import { StyledNavbarBtn, StyledToolbar } from "./styles";
 
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const dispatch = useDispatch();
   const user = useTypedSelector(selectCurrentUser);
   const navigate = useNavigate();
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.up("sm"));
 
   const { data: userProfileData } = useGetUserProfleQuery();
 
@@ -49,35 +62,56 @@ const Navbar = () => {
     <AppBar
       position="sticky"
       sx={{
-        backgroundColor: COLORS.WHITE,
+        background: COLORS.WHITE,
       }}
     >
-      <Toolbar
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          my: 1,
-        }}
-      >
+      <StyledToolbar>
         <Link to={user?.roles.includes("admin") ? "admin" : "play"} replace>
           <IconSvg name="brand" width={136} height={32} />
         </Link>
 
         <Box>
-          <IconButton onClick={handleMenuOpen} color="inherit">
-            <Avatar alt={user?.name} src={userProfileData?.avatar_link} />
+          <IconButton onClick={handleMenuOpen} disableRipple={true}>
+            <StyledNavbarBtn
+              direction="row"
+              spacing={0.5}
+              alignItems="center"
+              display={{ xs: "none", sm: "flex" }}
+            >
+              <Avatar alt={user?.name} src={userProfileData?.avatar_link} />
+              <Typography className="username">{user?.name}</Typography>
+              <KeyboardArrowDownIcon className="icon" />
+            </StyledNavbarBtn>
+            <Box display={{ xs: "block", sm: "none" }} color="black">
+              <MenuIcon />
+            </Box>
           </IconButton>
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
           >
-            <MenuItem onClick={handleNavigateProfile}>Profile</MenuItem>
-            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            <MenuItem
+              onClick={handleNavigateProfile}
+              sx={{
+                minWidth: "140px",
+              }}
+            >
+              <ListItemIcon color="black">
+                <PersonIcon />
+              </ListItemIcon>
+              <ListItemText>Profile</ListItemText>
+            </MenuItem>
+            {!matches && <Divider />}
+            <MenuItem onClick={handleLogout}>
+              <ListItemIcon color="black">
+                <LogoutIcon />
+              </ListItemIcon>
+              <ListItemText>Logout</ListItemText>
+            </MenuItem>
           </Menu>
         </Box>
-      </Toolbar>
+      </StyledToolbar>
     </AppBar>
   );
 };

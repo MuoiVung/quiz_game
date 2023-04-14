@@ -1,5 +1,6 @@
 import { Button, Box } from "@mui/material";
 import { Link } from "react-router-dom";
+import COLORS from "../../constants/colors";
 
 const AdminScreen = () => {
   return (
@@ -12,15 +13,25 @@ const AdminScreen = () => {
       <Box display="flex" flexDirection="column">
         <Button
           component={Link}
+          size="large"
           sx={{
             my: "24px",
+            color: COLORS.WHITE,
           }}
           variant="contained"
           to="/play"
         >
           Play
         </Button>
-        <Button component={Link} to="/management" variant="contained">
+        <Button
+          size="large"
+          component={Link}
+          to="/management"
+          variant="contained"
+          sx={{
+            color: COLORS.WHITE,
+          }}
+        >
           Management
         </Button>
       </Box>

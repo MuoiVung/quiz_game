@@ -30,7 +30,8 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
       keepUnusedDataFor: 0,
     }),
     submitQuestions: builder.mutation<
-      TransformSubmitQuestionsResponse,
+      // TransformSubmitQuestionsResponse,
+      SubmitQuestionsResponse,
       SubmitQuestionsRequest
     >({
       query: (body) => ({
@@ -38,37 +39,39 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
-      transformResponse: (response: SubmitQuestionsResponse) => {
-        const { data } = response;
+      // transformResponse: (response: SubmitQuestionsResponse) => {
+      //   const { data } = response;
 
-        const answers: TransformCorrectAnswer[] = data.listQuestionChecked.map(
-          (checkedQuestion) => {
-            const { title, answers } = checkedQuestion;
-            const answerContents: string[] = [];
-            const correctAnswerContents: string[] = [];
+      //   console.log(data);
 
-            for (const ans of answers) {
-              if (ans.hasOwnProperty("is_submit_correct")) {
-                answerContents.push(ans.content);
-              }
-              if (ans.is_correct) {
-                correctAnswerContents.push(ans.content);
-              }
-            }
+      //   const answers: TransformCorrectAnswer[] = data.listQuestionChecked.map(
+      //     (checkedQuestion) => {
+      //       const { title, answers } = checkedQuestion;
+      //       const answerContents: string[] = [];
+      //       const correctAnswerContents: string[] = [];
 
-            return {
-              question: title,
-              answers: answerContents,
-              correctAnswers: correctAnswerContents,
-            };
-          }
-        );
+      //       for (const ans of answers) {
+      //         if (ans.hasOwnProperty("is_submit_correct")) {
+      //           answerContents.push(ans.content);
+      //         }
+      //         if (ans.is_correct) {
+      //           correctAnswerContents.push(ans.content);
+      //         }
+      //       }
 
-        return {
-          answers,
-          totalScore: data.totalScore,
-        };
-      },
+      //       return {
+      //         question: title,
+      //         answers: answerContents,
+      //         correctAnswers: correctAnswerContents,
+      //       };
+      //     }
+      //   );
+
+      //   return {
+      //     answers,
+      //     totalScore: data.totalScore,
+      //   };
+      // },
     }),
     getAllQuestions: builder.query<
       GetAllQuestionsData,

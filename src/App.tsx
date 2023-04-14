@@ -1,3 +1,4 @@
+import store from "./store/store";
 import { ThemeProvider } from "@emotion/react";
 import { CssBaseline } from "@mui/material";
 import { Provider } from "react-redux";
@@ -7,7 +8,6 @@ import "react-toastify/dist/ReactToastify.css";
 
 import theme from "./styles/theme";
 import MainRoutes from "./routes/MainRoutes";
-import store from "./store/store";
 
 function App() {
   return (
