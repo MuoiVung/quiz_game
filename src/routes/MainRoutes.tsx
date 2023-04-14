@@ -62,7 +62,7 @@ const MainRoutes = () => {
       <Route path={PATH.LOGIN} element={<LoginScreen />} />
       <Route path={PATH.REGISTER} element={<RegisterScreen />} />
       <Route path={PATH.FORGOT_PASSWORD} element={<ForgotPasswordScreen />} />
-      <Route path={PATH.UNAUTHORIZED} element={<UnauthorizedScreen />} />
+      <Route path={PATH.NOT_FOUND} element={<ErrorScreen />} />
 
       {/* Admin routes */}
       <Route element={<RequireAuth allowedRoles={["admin"]} />}>

@@ -7,6 +7,7 @@ import {
 } from "../store/features/authSlice";
 import { useTypedSelector } from "../store/store";
 import { RoleType } from "../types";
+import { PATH } from "../routes/config";
 
 const RequireAuth = ({ allowedRoles }: { allowedRoles: RoleType[] }) => {
   const user = useTypedSelector(selectCurrentUser);
@@ -17,7 +18,7 @@ const RequireAuth = ({ allowedRoles }: { allowedRoles: RoleType[] }) => {
       <Outlet />
     </Wrapper>
   ) : token ? (
-    <Navigate to="unauthorized" replace />
+    <Navigate to={PATH.NOT_FOUND} replace />
   ) : (
     <Navigate to="login" replace />
   );

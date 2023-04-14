@@ -1,11 +1,17 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Box, Button, Container, TextField, Typography } from "@mui/material";
+import { Box, Button, TextField, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
 
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { questionsApiSlice } from "../../api/QuestionsAPI";
+import CircularSpinner from "../../components/CircularSpinner";
 import COLORS from "../../constants/colors";
+import store from "../../store/store";
 import { SelectPlayQuestionsDataType } from "./types";
+import { SESSION_KEY } from "../../constants/storage";
 
 const validateSchema = yup
   .object({
@@ -23,11 +29,41 @@ const PlayScreen = () => {
     resolver: yupResolver(validateSchema),
   });
 
+  const [isGetPlayQuestionsLoading, setIsGetPlayQuestionsLoading] =
+    useState(false);
+
   const navigate = useNavigate();
 
-  const handleStartGame = (data: SelectPlayQuestionsDataType) => {
-    reset();
-    navigate(`/play/${data.total}`, { replace: true });
+  const handleStartGame = async (data: SelectPlayQuestionsDataType) => {
+    // clear save game data before starting a new game
+    sessionStorage.removeItem(SESSION_KEY.INGAME_DATA);
+
+    try {
+      setIsGetPlayQuestionsLoading(true);
+      const result = await store
+        .dispatch(
+          questionsApiSlice.endpoints.getPlayQuestions.initiate(
+            {
+              total: data.total.toString(),
+            },
+            { forceRefetch: true }
+          )
+        )
+        .unwrap();
+
+      const questionData = result.data;
+      reset();
+      navigate(`/play/${data.total}`, {
+        replace: true,
+        state: { questionData },
+      });
+    } catch (error) {
+      toast.error(
+        "Failed to load questions for playing! Please try again later"
+      );
+    } finally {
+      setIsGetPlayQuestionsLoading(false);
+    }
   };
 
   return (
@@ -79,6 +115,7 @@ const PlayScreen = () => {
         </Box>
       </Box>
       {/* FORM */}
+      <CircularSpinner isLoading={isGetPlayQuestionsLoading} />
     </Box>
   );
 };

@@ -27,6 +27,7 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
       GetPlayQuestionsRequest
     >({
       query: (arg) => `questions/play?total=${arg.total}`,
+      keepUnusedDataFor: 0,
     }),
     submitQuestions: builder.mutation<
       TransformSubmitQuestionsResponse,

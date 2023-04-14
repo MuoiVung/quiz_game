@@ -2,7 +2,7 @@ export const PATH = {
   LOGIN: "login",
   REGISTER: "register",
   FORGOT_PASSWORD: "forgot-password",
-  UNAUTHORIZED: "unauthorized",
+  NOT_FOUND: "not-found",
   ADMIN: "admin",
   MANAGEMENT: "management",
   PLAY: "play",

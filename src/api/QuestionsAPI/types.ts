@@ -71,10 +71,10 @@ export interface SubmitQuestions {
 }
 
 export interface SubmitQuestionsRequest {
-  listQuestionSubmitted: ListQuestionSubmitted[];
+  listQuestionSubmitted: QuestionSubmitted[];
 }
 
-export interface ListQuestionSubmitted {
+export interface QuestionSubmitted {
   id: number;
   answersSubmittedId: number[];
 }
