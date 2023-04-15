@@ -1,4 +1,4 @@
-import { Avatar, Button, styled } from "@mui/material";
+import { Avatar, styled } from "@mui/material";
 import CustomModal from "../CustomModal/CustomModal";
 
 export const StyledAvatar = styled(Avatar)({
@@ -6,13 +6,10 @@ export const StyledAvatar = styled(Avatar)({
   height: 60,
 });
 
-export const ThumbnailContainer = styled(Button)(({ theme }) => ({
-  borderRadius: 999,
-}));
-
 export const PreviewAvatar = styled(Avatar)({
   width: 300,
   height: 300,
+  border: "1px solid yellow",
 });
 
 export const PreviewModal = styled(CustomModal)({

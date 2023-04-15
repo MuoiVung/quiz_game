@@ -1,10 +1,6 @@
+import { Box, Button } from "@mui/material";
 import { useState } from "react";
-import {
-  PreviewAvatar,
-  PreviewModal,
-  StyledAvatar,
-  ThumbnailContainer,
-} from "./styles";
+import { PreviewAvatar, PreviewModal, StyledAvatar } from "./styles";
 import { ThumbnailProps } from "./types";
 
 const Thumbnail = ({ src }: ThumbnailProps) => {
@@ -20,14 +16,16 @@ const Thumbnail = ({ src }: ThumbnailProps) => {
 
   return (
     <>
-      <ThumbnailContainer onClick={handleOpenPreview}>
+      <Button onClick={handleOpenPreview}>
         <StyledAvatar src={src} />
-        {preview && (
-          <PreviewModal open={preview} onClose={handleClosePreview}>
+      </Button>
+      {preview && (
+        <PreviewModal open={preview} onClose={handleClosePreview}>
+          <Box>
             <PreviewAvatar src={src} />
-          </PreviewModal>
-        )}
-      </ThumbnailContainer>
+          </Box>
+        </PreviewModal>
+      )}
     </>
   );
 };

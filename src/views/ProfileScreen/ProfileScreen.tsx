@@ -26,6 +26,8 @@ import { ChangePasswordFormDataType } from "./types";
 import { useForm } from "react-hook-form";
 import { LoadingButton } from "@mui/lab";
 import { ErrorResponseType } from "../../api/AuthAPI/types";
+import FormModal from "../../components/FormModal/FormModal";
+import FormModalButton from "../../components/FormModalButton/FormModalButton";
 
 const defaultValues: ChangePasswordFormDataType = {
   currentPassword: "",
@@ -231,7 +233,11 @@ const ProfileScreen = () => {
             }}
           />
         </Button>
-        <Stack spacing={1}>
+        <Stack
+          spacing={1}
+          alignItems={{ xs: "center", md: "flex-start" }}
+          mt={{ xs: "24px", md: 0 }}
+        >
           <Typography
             variant="h4"
             textTransform="capitalize"
@@ -254,13 +260,12 @@ const ProfileScreen = () => {
         </Button>
       </Stack>
       {/* END: Information */}
-      <CustomModal
+      <FormModal
         open={isChangePasswordModalOpen}
         onClose={handleCloseChangePasswordModal}
+        title="Change Password"
+        isLoading={isChangePasswordLoading}
       >
-        <Typography variant="h4" textAlign="center" mb="16px">
-          Change Password
-        </Typography>
         <Stack component="form" onSubmit={handleSubmit(handleChangePassword)}>
           <TextField
             required
@@ -300,26 +305,12 @@ const ProfileScreen = () => {
             autoComplete="true"
           />
           {/* Buttons */}
-          <Box display="flex" justifyContent="flex-end" my="16px">
-            <LoadingButton
-              type="submit"
-              variant="contained"
-              sx={{ color: COLORS.WHITE, mr: "12px" }}
-              loading={isChangePasswordLoading}
-            >
-              Save
-            </LoadingButton>
-            <Button
-              color="error"
-              variant="contained"
-              onClick={handleCloseChangePasswordModal}
-              sx={{ color: COLORS.WHITE }}
-            >
-              Cancel
-            </Button>
-          </Box>
+          <FormModalButton
+            loading={isChangePasswordLoading}
+            onCloseModal={handleCloseChangePasswordModal}
+          />
         </Stack>
-      </CustomModal>
+      </FormModal>
     </Container>
   );
 };

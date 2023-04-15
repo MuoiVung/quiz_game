@@ -19,7 +19,7 @@ const defaultRegisterUser: RegisterFormDataType = {
   name: "",
   password: "",
   retypePassword: "",
-  roles: ["user"],
+  roles: [],
 };
 
 const schema = yup

@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material";
 import { toast } from "react-toastify";
 
 import { ErrorResponseType } from "../../api/AuthAPI/types";
