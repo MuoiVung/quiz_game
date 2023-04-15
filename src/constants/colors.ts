@@ -11,12 +11,17 @@ const COLORS = {
   BLACK: "#333333",
   WHITE: "#ffffff",
   GRAY: "#d1d1d1",
-  GRAY_700: "#A8A8A8",
+  // GRAY_700: "#A8A8A8",
+  GRAY_700: "#707070",
   GRAY_100: "#fafafa",
   PURPlE: "#461A42",
   BLUE: "#2F6DAE",
   OCEAN: "#2C9CA6",
   RED: "#D4546A",
+  RED_BORDER: "#ef3c69",
+  GREEN_BORDER: "rgb(0, 201, 133)",
+  YELLOW_BACKGROUND: "#fef4d3",
+  YELLOW_NOTE: "#737321",
 };
 
 export default COLORS;

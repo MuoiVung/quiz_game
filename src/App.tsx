@@ -5,9 +5,11 @@ import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ErrorBoundary } from "react-error-boundary";
 
 import theme from "./styles/theme";
 import MainRoutes from "./routes/MainRoutes";
+import ErrorScreen from "./components/ErrorScreen";
 
 function App() {
   return (
@@ -15,7 +17,9 @@ function App() {
       <Provider store={store}>
         <CssBaseline />
         <ThemeProvider theme={theme}>
-          <MainRoutes />
+          <ErrorBoundary fallback={<ErrorScreen />}>
+            <MainRoutes />
+          </ErrorBoundary>
         </ThemeProvider>
         <ToastContainer />
       </Provider>

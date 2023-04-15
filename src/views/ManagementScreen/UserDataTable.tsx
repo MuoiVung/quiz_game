@@ -12,7 +12,7 @@ import {
   usersApiSlice,
 } from "../../api/UsersAPI";
 import CircularSpinner from "../../components/CircularSpinner";
-import DeleteModal from "../../components/DeleteModal";
+import DeleteModal from "../../components/ConfirmModal";
 import COLORS from "../../constants/colors";
 import store from "../../store/store";
 import AddUserModal from "./AddUserModal";
@@ -280,7 +280,7 @@ const UserDataTable = ({
           isLoading={isDeleteUserLoading}
           title="Delete User"
           onCloseModal={onCloseDeleteModal}
-          onConfirmDelete={handleDeleteUser}
+          onConfirm={handleDeleteUser}
           open={isDeleteModalOpen}
         />
       )}

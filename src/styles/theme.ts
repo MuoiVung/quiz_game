@@ -9,6 +9,12 @@ const theme = createTheme({
     background: {
       default: COLORS.WHITE,
     },
+    success: {
+      main: "rgb(0, 201, 133)",
+    },
+    error: {
+      main: "#ef3c69",
+    },
 
     common: {
       YELLOW_100: "#fef4d3",

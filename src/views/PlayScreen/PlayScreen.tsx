@@ -52,6 +52,12 @@ const PlayScreen = () => {
         .unwrap();
 
       const questionData = result.data;
+
+      if (!questionData || questionData?.length === 0) {
+        toast.warning("Sorry, there is no question. Please play again later!");
+        return;
+      }
+
       reset();
       navigate(`/play/${data.total}`, {
         replace: true,

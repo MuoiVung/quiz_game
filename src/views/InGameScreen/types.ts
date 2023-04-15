@@ -1,4 +1,5 @@
 import {
+  ListQuestionChecked,
   QuestionSubmitted,
   TransformSubmitQuestionsResponse,
 } from "./../../api/QuestionsAPI/types";
@@ -13,4 +14,5 @@ export type ResultTableProps = {
 export type IngameDataType = {
   submittedQuestions: QuestionSubmitted[];
   currentQuestion: number;
+  currentReviewQuestions: ListQuestionChecked[];
 };

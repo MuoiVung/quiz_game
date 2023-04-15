@@ -1,6 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
-  Avatar,
   Box,
   Button,
   FormLabel,
@@ -24,8 +23,8 @@ import {
 import CheckboxList from "../../components/CheckboxList/CheckboxList";
 import FormModal from "../../components/FormModal";
 import FormModalButton from "../../components/FormModalButton";
-import COLORS from "../../constants/colors";
 import Thumbnail from "../../components/Thumbnail";
+import COLORS from "../../constants/colors";
 
 const defaultUrlModal = {
   url: "",

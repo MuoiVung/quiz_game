@@ -1,14 +1,17 @@
 import { Button, Stack, Typography } from "@mui/material";
 import FormModal from "../FormModal";
-import { DeleteModalProps } from "./types";
+import { ConfirmModalProps } from "./types";
 
-const DeleteModal = ({
-  isLoading,
+const ConfirmModal = ({
+  isLoading = false,
   title,
   onCloseModal,
   open,
-  onConfirmDelete,
-}: DeleteModalProps) => {
+  onConfirm,
+  content = "Are you sure want to delete?",
+  firstBtnName = "Delete",
+  secondBtnName = "Cancel",
+}: ConfirmModalProps) => {
   return (
     <FormModal
       isLoading={isLoading}
@@ -16,7 +19,7 @@ const DeleteModal = ({
       onClose={onCloseModal}
       open={open}
     >
-      <Typography textAlign="center">Are you sure want to delete?</Typography>
+      <Typography textAlign="center">{content}</Typography>
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -25,23 +28,23 @@ const DeleteModal = ({
       >
         <Button
           size="large"
-          color="error"
+          color="success"
           variant="outlined"
-          onClick={onConfirmDelete}
+          onClick={onConfirm}
         >
-          Delete
+          {firstBtnName}
         </Button>
         <Button
           onClick={onCloseModal}
           size="large"
-          color="success"
+          color="error"
           variant="outlined"
         >
-          Cancel
+          {secondBtnName}
         </Button>
       </Stack>
     </FormModal>
   );
 };
 
-export default DeleteModal;
+export default ConfirmModal;

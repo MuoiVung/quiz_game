@@ -23,7 +23,7 @@ import {
   QuestionRowType,
 } from "./types";
 import { number } from "yup";
-import DeleteModal from "../../components/DeleteModal/DeleteModal";
+import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 
 const QuestionDataTable = ({
   paginationModel,
@@ -290,11 +290,11 @@ const QuestionDataTable = ({
         />
       )}
       {isDeleteModalOpen && (
-        <DeleteModal
+        <ConfirmModal
           isLoading={isDeleteQuestionLoading}
           title="Delete Question"
           onCloseModal={onCloseDeleteModal}
-          onConfirmDelete={handleDeleteQuestion}
+          onConfirm={handleDeleteQuestion}
           open={isDeleteModalOpen}
         />
       )}

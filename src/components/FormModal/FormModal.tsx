@@ -24,9 +24,9 @@ const FormModal = ({
             <FormModalHeader variant="h5">{title}</FormModalHeader>
             {children}
           </Box>
+          <CircularSpinner isLoading={isLoading} />
         </ModalContent>
       </ModalContainer>
-      <CircularSpinner isLoading={isLoading} />
     </>
   );
 };

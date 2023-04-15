@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
-import { SubmitQuestionsResponse } from "../../api/QuestionsAPI/types";
+import { ListQuestionChecked } from "../../api/QuestionsAPI/types";
 
 export type ReviewProps = {
-  result: SubmitQuestionsResponse;
+  result: ListQuestionChecked[];
 };
 
 export type InfoCardProps = {
@@ -10,4 +10,18 @@ export type InfoCardProps = {
   content: string;
   icon: ReactNode;
   color: string;
+};
+
+export type ReviewQuestionType = {
+  id: number;
+  question: string;
+  point: number;
+  isCorrect: boolean;
+  answers: ReviewAnswer[];
+};
+
+export type ReviewAnswer = {
+  status: "fail" | "true" | "unselected" | "true-unselected";
+  content: string;
+  id: number;
 };

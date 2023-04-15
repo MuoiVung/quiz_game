@@ -8,24 +8,27 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import { useSubmitQuestionsMutation } from "../../api/QuestionsAPI";
 import {
   GetPlayQuestionData,
+  ListQuestionChecked,
   QuestionSubmitted,
+  SubmitQuestionsResponse,
 } from "../../api/QuestionsAPI/types";
 import LoadingScreen from "../../components/LoadingScreen";
-import COLORS from "../../constants/colors";
+import Review from "../../components/Review";
 import { SESSION_KEY } from "../../constants/storage";
 import {
   sessionDecryptData,
   sessionEncryptData,
 } from "../../utils/lsCryptoJS.util";
-import ResultTable from "./ResultTable";
 import { ThumbnailImage } from "./styles";
 import { IngameDataType } from "./types";
-import Review from "../../components/Review";
+import ErrorScreen from "../../components/ErrorScreen";
+import ConfirmModal from "../../components/ConfirmModal";
+import { toast } from "react-toastify";
 
 function InGameScreen() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -34,7 +37,13 @@ function InGameScreen() {
     QuestionSubmitted[]
   >([]);
 
+  const [currentReviewQuestions, setCurrentReviewQuestions] = useState<
+    ListQuestionChecked[]
+  >([]);
+
   const [isSomethingLoading, setIsSomethingLoading] = useState(true);
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   const [
     submitQuestions,
@@ -43,13 +52,14 @@ function InGameScreen() {
 
   const { state } = useLocation();
 
-  const questionData: GetPlayQuestionData[] = state.questionData;
+  const questionData: GetPlayQuestionData[] = state?.questionData;
 
   useEffect(() => {
     const handleUnload = () => {
       const ingameData: IngameDataType = {
         currentQuestion,
         submittedQuestions,
+        currentReviewQuestions,
       };
       sessionEncryptData(SESSION_KEY.INGAME_DATA, ingameData);
     };
@@ -57,7 +67,7 @@ function InGameScreen() {
     const unsubscribe = window.addEventListener("beforeunload", handleUnload);
 
     return unsubscribe;
-  }, [submittedQuestions, currentQuestion]);
+  }, [submittedQuestions, currentQuestion, currentReviewQuestions]);
 
   useEffect(() => {
     const ingameData: IngameDataType = sessionDecryptData(
@@ -67,20 +77,23 @@ function InGameScreen() {
     if (ingameData) {
       setSubmittedQuetions(ingameData.submittedQuestions);
       setCurrentQuestion(ingameData.currentQuestion);
+      setCurrentReviewQuestions(ingameData.currentReviewQuestions);
     }
     setIsSomethingLoading(false);
   }, []);
 
-  if (isSubmitQuestionLoading || isSomethingLoading) {
-    return <LoadingScreen />;
-  }
+  useEffect(() => {
+    if (submitResponseData?.data?.listQuestionChecked) {
+      setCurrentReviewQuestions(submitResponseData.data.listQuestionChecked);
+    }
+  }, [submitResponseData?.data.listQuestionChecked]);
+
+  // if (isSubmitQuestionLoading || isSomethingLoading) {
+  //   return <LoadingScreen />;
+  // }
 
   if (!questionData) {
-    return (
-      <Box>
-        <Typography>Sorry! No Questions. Please wait!</Typography>
-      </Box>
-    );
+    return <ErrorScreen />;
   }
 
   const handleOptionSelect = (optionId: number) => {
@@ -116,11 +129,24 @@ function InGameScreen() {
     setSubmittedQuetions(newSubmittedQuestions);
   };
 
+  const handleSubmitQuestions = async () => {
+    try {
+      await submitQuestions({
+        listQuestionSubmitted: submittedQuestions,
+      }).unwrap();
+      setIsConfirmModalOpen(false);
+      setCurrentQuestion((curr) => curr + 1);
+    } catch (error) {
+      toast.error("Something went wrong! Please try again later!");
+    }
+  };
+
   const handleNextQuestion = () => {
     if (currentQuestion === questionData.length - 1) {
-      submitQuestions({ listQuestionSubmitted: submittedQuestions });
+      setIsConfirmModalOpen(true);
+    } else {
+      setCurrentQuestion((curr) => curr + 1);
     }
-    setCurrentQuestion((curr) => curr + 1);
   };
 
   const handleBackQuestion = () => {
@@ -190,31 +216,17 @@ function InGameScreen() {
           </Box>
         </Card>
       ) : (
-        //  : (
-        //   <Box
-        //     sx={{
-        //       display: "flex",
-        //       alignItems: "center",
-        //       justifyContent: "center",
-        //     }}
-        //   >
-        //     <Box>
-        //       <Typography variant="h4">Quiz Complete!</Typography>
-        //       {submitResponseData && <ResultTable data={submitResponseData} />}
-        //       <Button
-        //         variant="contained"
-        //         fullWidth
-        //         sx={{ mt: "16px", zIndex: 999, color: COLORS.WHITE }}
-        //         component={Link}
-        //         to="/play"
-        //       >
-        //         Play Again
-        //       </Button>
-        //     </Box>
-        //   </Box>
-        // )
-        submitResponseData && <Review result={submitResponseData} />
+        currentReviewQuestions && <Review result={currentReviewQuestions} />
       )}
+      <ConfirmModal
+        title="Submit Answers"
+        content="Are you sure want to submit answers?"
+        firstBtnName="Submit"
+        open={isConfirmModalOpen}
+        onCloseModal={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleSubmitQuestions}
+        isLoading={isSubmitQuestionLoading}
+      />
     </Box>
   );
 }
