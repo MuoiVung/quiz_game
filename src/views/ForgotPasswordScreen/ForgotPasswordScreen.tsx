@@ -51,7 +51,7 @@ const ForgotPasswordScreen = () => {
     <AuthContainer container>
       <Brand />
 
-      <Grid item xs={12} sm={8} md={5} p={4}>
+      <Grid item xs={12} sm={12} md={5} p={4}>
         <AuthHeader
           title="Welcome Back!"
           subTitle="Please enter your email to reset password"

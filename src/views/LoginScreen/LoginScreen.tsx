@@ -79,7 +79,7 @@ const LoginScreen = () => {
     <AuthContainer container>
       <Brand />
 
-      <Grid item xs={12} sm={8} md={6} p={4}>
+      <Grid item xs={12} sm={12} md={6} p={4}>
         <AuthHeader
           title="Welcome Back!"
           subTitle="Please login to your account"
