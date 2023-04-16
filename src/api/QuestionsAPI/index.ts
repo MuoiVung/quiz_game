@@ -13,8 +13,6 @@ import {
   GetQuestionResponse,
   SubmitQuestionsRequest,
   SubmitQuestionsResponse,
-  TransformCorrectAnswer,
-  TransformSubmitQuestionsResponse,
   UpdateQuestionRequest,
   UpdateQuestionResponse,
   UploadThumbnailResponse,
