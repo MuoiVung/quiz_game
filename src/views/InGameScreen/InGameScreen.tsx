@@ -5,19 +5,21 @@ import {
   CardContent,
   CardHeader,
   Grid,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
+import { toast } from "react-toastify";
 import { useSubmitQuestionsMutation } from "../../api/QuestionsAPI";
 import {
   GetPlayQuestionData,
   ListQuestionChecked,
   QuestionSubmitted,
-  SubmitQuestionsResponse,
 } from "../../api/QuestionsAPI/types";
-import LoadingScreen from "../../components/LoadingScreen";
+import ConfirmModal from "../../components/ConfirmModal";
+import ErrorScreen from "../../components/ErrorScreen";
 import Review from "../../components/Review";
 import { SESSION_KEY } from "../../constants/storage";
 import {
@@ -26,9 +28,6 @@ import {
 } from "../../utils/lsCryptoJS.util";
 import { ThumbnailImage } from "./styles";
 import { IngameDataType } from "./types";
-import ErrorScreen from "../../components/ErrorScreen";
-import ConfirmModal from "../../components/ConfirmModal";
-import { toast } from "react-toastify";
 
 function InGameScreen() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -87,10 +86,6 @@ function InGameScreen() {
       setCurrentReviewQuestions(submitResponseData.data.listQuestionChecked);
     }
   }, [submitResponseData?.data.listQuestionChecked]);
-
-  // if (isSubmitQuestionLoading || isSomethingLoading) {
-  //   return <LoadingScreen />;
-  // }
 
   if (!questionData) {
     return <ErrorScreen />;
@@ -173,21 +168,23 @@ function InGameScreen() {
             <Grid container spacing={2} sx={{ mt: 2 }}>
               {questionData[currentQuestion].answers.map((option) => (
                 <Grid item xs={12} sm={6} key={option.id}>
-                  <Button
-                    variant={
-                      submittedQuestions[
-                        currentQuestion
-                      ]?.answersSubmittedId.includes(option.id)
-                        ? "contained"
-                        : "outlined"
-                    }
-                    fullWidth
-                    onClick={() => handleOptionSelect(option.id)}
-                  >
-                    {option.content.length > 30
-                      ? option.content.slice(0, 30) + "..."
-                      : option.content}
-                  </Button>
+                  <Tooltip title={option.content}>
+                    <Button
+                      variant={
+                        submittedQuestions[
+                          currentQuestion
+                        ]?.answersSubmittedId.includes(option.id)
+                          ? "contained"
+                          : "outlined"
+                      }
+                      fullWidth
+                      onClick={() => handleOptionSelect(option.id)}
+                    >
+                      {option.content.length > 30
+                        ? option.content.slice(0, 30) + "..."
+                        : option.content}
+                    </Button>
+                  </Tooltip>
                 </Grid>
               ))}
             </Grid>

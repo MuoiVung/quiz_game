@@ -103,8 +103,6 @@ const Review = ({ result }: ReviewProps) => {
     [result]
   );
 
-  console.log(result);
-
   return (
     <Container maxWidth="md">
       <Typography variant="h3" color="primary" textAlign="center" mb="24px">

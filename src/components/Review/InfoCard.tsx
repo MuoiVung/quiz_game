@@ -1,16 +1,14 @@
 import {
   Box,
   Card,
-  CardContent,
   Stack,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import React from "react";
-import { InfoCardProps } from "./types";
 import COLORS from "../../constants/colors";
 import { IconContainer, StyledCardContent } from "./styles";
+import { InfoCardProps } from "./types";
 
 const InfoCard = ({ title, content, icon, color }: InfoCardProps) => {
   const theme = useTheme();

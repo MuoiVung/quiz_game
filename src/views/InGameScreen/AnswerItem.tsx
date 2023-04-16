@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import COLORS from "../../constants/colors";
 import { AnswerItemProps } from "./types";
 
