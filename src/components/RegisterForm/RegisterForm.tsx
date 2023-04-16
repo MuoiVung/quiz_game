@@ -64,7 +64,6 @@ const RegisterForm = ({
   const handleSubmitForm = async (data: RegisterFormDataType) => {
     try {
       await onSubmitForm(data);
-      toast.success("Create user successfully!");
       reset();
     } catch (error) {
       const errorMessage = (error as ErrorResponseType).data.message;

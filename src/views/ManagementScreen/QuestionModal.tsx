@@ -114,7 +114,6 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
         addNewAnswers({ ...answer, questionId })
       );
       await Promise.all(promises);
-      toast.success("Add new question successuflly!");
       reset();
       onCloseModal();
     } catch (error) {

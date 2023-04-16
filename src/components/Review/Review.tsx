@@ -77,13 +77,12 @@ const Review = ({ result }: ReviewProps) => {
 
   const totalScore = useMemo(
     () =>
-      result.reduce(
-        (total, curr) =>
-          total + curr.numberSubmitCorrect === curr.numberAnswersCorrect
-            ? curr.scoreThisQuestion
-            : 0,
-        0
-      ),
+      result.reduce((total, curr) => {
+        if (curr.numberSubmitCorrect === curr.numberAnswersCorrect) {
+          return total + curr.scoreThisQuestion;
+        }
+        return total;
+      }, 0),
     [result]
   );
 
