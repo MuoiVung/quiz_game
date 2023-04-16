@@ -25,6 +25,7 @@ import FormModal from "../../components/FormModal";
 import FormModalButton from "../../components/FormModalButton";
 import COLORS from "../../constants/colors";
 import { AddQuestionFormType, BasicModalProps } from "./types";
+import Thumbnail from "../../components/Thumbnail/Thumbnail";
 
 const defaultUrlModal = {
   url: "",
@@ -87,7 +88,8 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
   const [addNewAnswers, { isLoading: isAddNewAnswerLoading }] =
     useAddNewAnswerMutation();
 
-  const [uploadThumbnail] = useUploadThumbnailMutation();
+  const [uploadThumbnail, { isLoading: isUploadThumbnailLoading }] =
+    useUploadThumbnailMutation();
 
   const [thumbnailUrl, setThumbnailUrl] = useState("");
 
@@ -159,19 +161,11 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
     formData.append("thumbnail", files[0]);
 
     try {
-      const response = await toast.promise(
-        () => uploadThumbnail(formData).unwrap(),
-        {
-          pending: "Uploading...",
-          success: "Uploaded thumbnail successfully",
-          error: "Failed to upload thumbnail",
-        }
-      );
-
+      const response = await uploadThumbnail(formData).unwrap();
       setValue("thumbnailLink", response.data);
       setThumbnailUrl(response.data);
     } catch (error) {
-      console.error("Faild to upload thumbnail");
+      toast.error("Failed to upload thumbnail");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -183,7 +177,11 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
       onClose={handleCloseModal}
       open={isOpen}
       title="Add Question"
-      isLoading={isAddNewAnswerLoading || isAddNewQuestionLoading}
+      isLoading={
+        isAddNewAnswerLoading ||
+        isAddNewQuestionLoading ||
+        isUploadThumbnailLoading
+      }
     >
       {/* START: ADD QUESTION FORM */}
       <Box
@@ -278,14 +276,7 @@ const QuestionModal = ({ isOpen, onCloseModal }: BasicModalProps) => {
         <Typography sx={{ mt: "20px", mb: "16px" }}>Thumbnail</Typography>
 
         <Box display="flex" justifyContent="center">
-          <Avatar
-            alt="thumbnail"
-            sx={{
-              width: "50px",
-              height: "50px",
-            }}
-            src={thumbnailUrl}
-          />
+          <Thumbnail src={thumbnailUrl} />
         </Box>
 
         <Stack spacing="2px" justifyContent="center" mt={2}>

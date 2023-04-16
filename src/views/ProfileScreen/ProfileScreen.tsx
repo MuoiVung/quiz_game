@@ -1,33 +1,31 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import {
   Avatar,
-  Box,
   Button,
   Container,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { toast } from "react-toastify";
 import { useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
+import * as yup from "yup";
 
+import { useForm } from "react-hook-form";
+import { ErrorResponseType } from "../../api/AuthAPI/types";
 import {
   useChangePasswordMutation,
   useGetUserProfleQuery,
   useUploadAvatarMutation,
 } from "../../api/UsersAPI";
-import LoadingScreen from "../../components/LoadingScreen";
-import COLORS from "../../constants/colors";
-import CustomModal from "../../components/CustomModal/CustomModal";
-import { ChangePasswordFormDataType } from "./types";
-import { useForm } from "react-hook-form";
-import { LoadingButton } from "@mui/lab";
-import { ErrorResponseType } from "../../api/AuthAPI/types";
 import FormModal from "../../components/FormModal/FormModal";
 import FormModalButton from "../../components/FormModalButton/FormModalButton";
+import LoadingScreen from "../../components/LoadingScreen";
+import COLORS from "../../constants/colors";
+import { ChangePasswordFormDataType } from "./types";
+import CircularSpinner from "../../components/CircularSpinner/CircularSpinner";
 
 const defaultValues: ChangePasswordFormDataType = {
   currentPassword: "",
@@ -76,7 +74,8 @@ const ProfileScreen = () => {
   const [changePassword, { isLoading: isChangePasswordLoading }] =
     useChangePasswordMutation();
 
-  const [uploadAvatar] = useUploadAvatarMutation();
+  const [uploadAvatar, { isLoading: isUploadAvatarLoading }] =
+    useUploadAvatarMutation();
 
   const [avatarUrl, setAvatarUrl] = useState(
     userProfileData?.avatar_link || ""
@@ -108,14 +107,7 @@ const ProfileScreen = () => {
     formData.append("avatar", files[0]);
 
     try {
-      const response = await toast.promise(
-        () => uploadAvatar({ userId, formData }).unwrap(),
-        {
-          pending: "Uploading...",
-          success: "Uploaded avatar successfully",
-          error: "Failed to upload avatar",
-        }
-      );
+      const response = await uploadAvatar({ userId, formData }).unwrap();
 
       setAvatarUrl(response.data);
     } catch (error) {
@@ -194,6 +186,7 @@ const ProfileScreen = () => {
             alt="user avatar"
             src={avatarUrl}
             sx={{
+              border: "1px solid yellow",
               height: 150,
               width: 150,
               objectFit: "cover",
@@ -311,6 +304,7 @@ const ProfileScreen = () => {
           />
         </Stack>
       </FormModal>
+      <CircularSpinner isLoading={isUploadAvatarLoading} />
     </Container>
   );
 };

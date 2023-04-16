@@ -22,12 +22,24 @@ import InfoCard from "./InfoCard";
 import { ReviewAnswer, ReviewProps, ReviewQuestionType } from "./types";
 
 const Review = ({ result }: ReviewProps) => {
-  const correctAnswers = result.filter(
-    (question) => question.numberSubmitCorrect === question.numberAnswersCorrect
+  const correctAnswers = useMemo(
+    () =>
+      result.filter(
+        (question) =>
+          question.numberSubmitCorrect === question.numberAnswersCorrect &&
+          question.scoreThisQuestion > 0
+      ),
+    [result]
   );
 
-  const incorrectAnswers = result.filter(
-    (question) => question.numberSubmitCorrect !== question.numberAnswersCorrect
+  const incorrectAnswers = useMemo(
+    () =>
+      result.filter(
+        (question) =>
+          question.numberSubmitCorrect !== question.numberAnswersCorrect ||
+          question.scoreThisQuestion <= 0
+      ),
+    [result]
   );
 
   const transformedData = useMemo(
@@ -61,9 +73,11 @@ const Review = ({ result }: ReviewProps) => {
         const reviewQuestion: ReviewQuestionType = {
           id: question.id,
           isCorrect:
-            question.numberAnswersCorrect === question.numberSubmitCorrect,
+            question.numberAnswersCorrect === question.numberSubmitCorrect &&
+            question.scoreThisQuestion > 0,
           point:
-            question.numberAnswersCorrect === question.numberSubmitCorrect
+            question.numberAnswersCorrect === question.numberSubmitCorrect &&
+            question.scoreThisQuestion > 0
               ? +question.scoreThisQuestion.toFixed(0)
               : 0,
           question: question.title,
@@ -78,13 +92,18 @@ const Review = ({ result }: ReviewProps) => {
   const totalScore = useMemo(
     () =>
       result.reduce((total, curr) => {
-        if (curr.numberSubmitCorrect === curr.numberAnswersCorrect) {
+        if (
+          curr.numberSubmitCorrect === curr.numberAnswersCorrect &&
+          curr.scoreThisQuestion > 0
+        ) {
           return total + curr.scoreThisQuestion;
         }
         return total;
       }, 0),
     [result]
   );
+
+  console.log(result);
 
   return (
     <Container maxWidth="md">
